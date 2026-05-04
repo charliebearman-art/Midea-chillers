@@ -376,3 +376,16 @@ a {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Mobile-only вариант с scale 0.96→1: добавляет «вес» при появлении
+   (Detail-карточки в колонке без sticky-стека). На десктопе остаётся
+   обычный translateY(40)→0, потому что sticky-cascade делает scale
+   избыточным и нарушает иерархию. */
+@media (max-width: 639px) {
+  [data-reveal][data-reveal-mobile-scale] {
+    transform: translateY(24px) scale(0.96);
+  }
+  [data-reveal][data-reveal-mobile-scale].reveal-in {
+    transform: translateY(0) scale(1);
+  }
+}
