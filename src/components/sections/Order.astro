@@ -38,25 +38,25 @@ import VideoModal from "../VideoModal.astro";
   >
   </div>
 
-  <div class="container-x py-20">
-    <h2 data-reveal class="text-center text-h1 font-medium text-text-primary">
+  <div class="container-x py-12 lg:py-20">
+    <h2 data-reveal class="text-center text-h2 font-medium text-text-primary lg:text-h1">
       <span class="gradient-text">Заказывайте</span><br />
       чиллеры Midea в&nbsp;компании «Даичи»
     </h2>
 
-    <div class="mt-12 flex flex-col gap-6">
+    <div class="mt-6 flex flex-col gap-2 lg:mt-12 lg:gap-6">
     <!-- Ряд 1: УТП | Видео | УТП -->
-    <div class="grid grid-cols-1 gap-6 lg:h-80 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-2 lg:h-80 lg:grid-cols-4 lg:gap-6">
       <!-- № 1 в мире -->
       <article
         data-reveal
-        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+        class="flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#1d2025] p-4 lg:h-auto lg:gap-0 lg:rounded-3xl lg:p-6"
       >
-        <h3 class="text-h2 font-medium text-text-primary">
+        <h3 class="text-h4 font-medium text-text-primary lg:text-h2">
           <span class="gradient-text">№&nbsp;1 в&nbsp;мире</span><br />
           по&nbsp;продажам чиллеров
         </h3>
-        <p class="text-body text-text-primary">
+        <p class="text-t12 text-text-primary lg:text-body">
           Компания «Даичи» — лидер рынка по&nbsp;итогам 2024 года
         </p>
       </article>
@@ -66,7 +66,7 @@ import VideoModal from "../VideoModal.astro";
       <article
         data-reveal
         data-reveal-delay="80"
-        class="relative h-80 overflow-hidden rounded-3xl bg-[#1d2025] lg:col-span-2 lg:h-auto"
+        class="relative h-[9.8125rem] overflow-hidden rounded-2xl bg-[#1d2025] lg:col-span-2 lg:h-auto lg:rounded-3xl"
       >
         <video
           autoplay
@@ -98,13 +98,13 @@ import VideoModal from "../VideoModal.astro";
       <article
         data-reveal
         data-reveal-delay="160"
-        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+        class="flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#1d2025] p-4 lg:h-auto lg:gap-0 lg:rounded-3xl lg:p-6"
       >
-        <h3 class="text-h2 font-medium text-text-primary">
+        <h3 class="text-h4 font-medium text-text-primary lg:text-h2">
           <span class="gradient-text">Эксклюзивная</span><br />
           складская программа
         </h3>
-        <p class="text-body text-text-primary">
+        <p class="text-t12 text-text-primary lg:text-body">
           Мы&nbsp;— первый дистрибьютор в&nbsp;России со&nbsp;складом модульных чиллеров
           со&nbsp;встроенным гидромодулем
         </p>
@@ -112,11 +112,11 @@ import VideoModal from "../VideoModal.astro";
     </div>
 
     <!-- Ряд 2: Фото | УТП | УТП | CTA -->
-    <div class="grid grid-cols-1 gap-6 lg:h-80 lg:grid-cols-4">
+    <div class="grid grid-cols-1 gap-2 lg:h-80 lg:grid-cols-4 lg:gap-6">
       <!-- Фото-карточка (небоскрёб) -->
       <article
         data-reveal
-        class="relative h-80 overflow-hidden rounded-3xl lg:h-auto"
+        class="relative h-[11.4375rem] overflow-hidden rounded-2xl lg:h-auto lg:rounded-3xl"
       >
         <img
           src="/images/usp-skyscraper.jpg"
@@ -133,12 +133,12 @@ import VideoModal from "../VideoModal.astro";
       <article
         data-reveal
         data-reveal-delay="80"
-        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+        class="flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#1d2025] p-4 lg:h-auto lg:gap-0 lg:rounded-3xl lg:p-6"
       >
-        <h3 class="text-h2 font-medium text-text-primary">
+        <h3 class="text-h4 font-medium text-text-primary lg:text-h2">
           <span class="gradient-text">Серийное</span> производство
         </h3>
-        <p class="text-body text-text-primary">
+        <p class="text-t12 text-text-primary lg:text-body">
           Midea — первый китайский производитель, запустивший серийный выпуск модульных
           чиллеров со&nbsp;встроенным гидромодулем
         </p>
@@ -148,13 +148,13 @@ import VideoModal from "../VideoModal.astro";
       <article
         data-reveal
         data-reveal-delay="160"
-        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+        class="flex flex-col items-start justify-between gap-4 rounded-2xl bg-[#1d2025] p-4 lg:h-auto lg:gap-0 lg:rounded-3xl lg:p-6"
       >
-        <h3 class="text-h2 font-medium text-text-primary">
+        <h3 class="text-h4 font-medium text-text-primary lg:text-h2">
           <span class="gradient-text">Только</span><br />
           в&nbsp;«Даичи»
         </h3>
-        <p class="text-body text-text-primary">
+        <p class="text-t12 text-text-primary lg:text-body">
           Чиллеры AQUA THERMAL GM&nbsp;—<br />
           эксклюзивно на&nbsp;складе в&nbsp;«Даичи»
         </p>
@@ -174,26 +174,25 @@ import VideoModal from "../VideoModal.astro";
         href="#contact"
         data-reveal
         data-reveal-delay="240"
-        class="group relative flex h-80 flex-col items-end justify-between overflow-hidden rounded-3xl bg-brand p-6 lg:h-auto"
+        class="group relative flex h-12 items-center justify-center overflow-hidden rounded-lg bg-brand px-5 lg:h-auto lg:flex-col lg:items-end lg:justify-between lg:rounded-3xl lg:p-6"
       >
-        <!-- Hover-bg overlay поверх bg-brand: прозрачный по умолчанию,
-             fade-in 300ms на ховере. -->
+        <!-- Hover-bg overlay поверх bg-brand: только на десктопе. -->
         <span
           aria-hidden="true"
-          class="pointer-events-none absolute inset-0 bg-[#EFF2F5] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
+          class="pointer-events-none absolute inset-0 hidden bg-[#EFF2F5] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100 lg:block"
         >
         </span>
 
         <p
-          class="relative w-full text-h2 font-medium text-white transition-colors duration-300 ease-out group-hover:text-text-inverse"
+          class="relative w-full text-center text-body font-medium text-white lg:text-left lg:text-h2 lg:transition-colors lg:duration-300 lg:ease-out lg:group-hover:text-text-inverse"
         >
           Оставить заявку
         </p>
         <span
-          class="relative flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand transition-colors duration-300 ease-out group-hover:bg-brand group-hover:text-[#EFF2F5]"
+          class="relative hidden h-12 w-12 items-center justify-center rounded-full bg-white text-brand transition-colors duration-300 ease-out group-hover:bg-brand group-hover:text-[#EFF2F5] lg:flex"
           aria-hidden="true"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <svg viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4">
             <path
               fill-rule="evenodd"
               clip-rule="evenodd"

@@ -64,17 +64,17 @@ const projects: Project[] = [
      (z-30) — следующая секция «наезжает» сверху как curtain, аналогично
      паттерну Products над Details (см. .products-curtain в global.css). -->
 <section
-  class="sticky top-16 overflow-hidden bg-ink-base py-20 lg:top-20"
+  class="sticky top-16 overflow-hidden bg-ink-base py-12 lg:top-20 lg:py-20"
 >
-  <div class="container-x flex flex-col gap-12">
-    <!-- Заголовок + кнопки навигации -->
+  <div class="container-x flex flex-col gap-6 lg:gap-12">
+    <!-- Заголовок + кнопки навигации (кнопки только на десктопе). -->
     <div class="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
-      <h2 data-reveal class="max-w-[37.5rem] text-h1 font-medium text-text-primary">
+      <h2 data-reveal class="text-center text-h2 font-medium text-text-primary w-full lg:w-auto lg:max-w-[37.5rem] lg:text-left lg:text-h1">
         <span class="gradient-text">Объекты</span><br />
         c&nbsp;чиллерами Midea
       </h2>
 
-      <div data-projects-nav class="flex items-center gap-4">
+      <div data-projects-nav class="hidden items-center gap-4 lg:flex">
         <button
           type="button"
           data-projects-prev
@@ -123,14 +123,14 @@ const projects: Project[] = [
          программно в JS на drag-end и при кликах по стрелкам. -->
     <div
       data-projects-track
-      class="-mx-2 flex cursor-grab select-none gap-6 overflow-x-auto scroll-smooth px-2 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      class="-mx-2 flex cursor-grab select-none gap-2 overflow-x-auto scroll-smooth px-2 pb-2 lg:gap-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       {
         projects.map((project, i) => (
           <button
             type="button"
             data-project-card={i}
-            class="group flex w-[25.9375rem] shrink-0 cursor-grab flex-col gap-6 rounded-3xl border-2 border-strong bg-black/40 px-2 pb-6 pt-2 text-left transition-colors duration-300 hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            class="group flex w-[17.5rem] shrink-0 cursor-grab flex-col gap-4 rounded-3xl border-2 border-strong bg-black/40 px-2 pb-4 pt-2 text-left transition-colors duration-300 hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:w-[25.9375rem] lg:gap-6 lg:pb-6"
           >
             <div class="relative aspect-[543/342] w-full overflow-hidden rounded-2xl">
               <img
@@ -143,8 +143,8 @@ const projects: Project[] = [
                 class="absolute inset-0 h-full w-full object-cover"
               />
             </div>
-            <div class="flex flex-col gap-1 px-4">
-              <p class="text-body text-text-primary">{project.category}</p>
+            <div class="flex flex-col gap-1 px-2 lg:px-4">
+              <p class="text-t12 text-text-primary lg:text-body">{project.category}</p>
               <p class="text-h4 font-medium text-text-primary">{project.title}</p>
             </div>
           </button>

@@ -23,15 +23,20 @@ const { number, highlight, title, description, image, imageAlt = "" } = Astro.pr
 const isList = Array.isArray(description);
 ---
 
+<!-- На мобиле: картинка сверху (aspect 572/350), текст снизу — flex-col-reverse
+     инвертирует порядок DOM (text-first → image-first визуально). На десктопе
+     lg:flex-row → text слева + картинка справа, sticky-стек, h-22.375rem.
+     Номер виден только на десктопе. -->
 <article
-  class="relative flex flex-col gap-6 rounded-3xl border-2 border-strong bg-glass-deep p-2 backdrop-blur-[1.5rem] lg:h-[22.375rem] lg:flex-row lg:items-stretch lg:gap-12"
+  class="relative flex flex-col-reverse rounded-3xl border-2 border-strong bg-glass-deep p-2 backdrop-blur-[12px] lg:h-[22.375rem] lg:flex-row lg:items-stretch lg:gap-12 lg:backdrop-blur-[1.5rem]"
 >
-  <!-- Левая часть: номер + текст -->
-  <div class="flex flex-1 gap-12 p-6">
-    <span class="shrink-0 w-20 text-h3 font-medium text-text-primary">
+  <!-- Текст (на мобиле gap=0 у article, padding на этом блоке px-2 py-4;
+       на десктопе тут флекс-строка с номером + контентом, p-6). -->
+  <div class="flex flex-1 px-2 py-4 lg:gap-12 lg:p-6">
+    <span class="hidden shrink-0 w-20 text-h3 font-medium text-text-primary lg:block">
       {number}
     </span>
-    <div class="flex flex-1 flex-col justify-between gap-6">
+    <div class="flex flex-1 flex-col justify-between gap-2 lg:gap-6">
       <h3 class="text-h4 font-medium text-text-primary lg:text-h3">
         <span class="gradient-text">{highlight}</span><br />
         {title}
@@ -51,8 +56,10 @@ const isList = Array.isArray(description);
     </div>
   </div>
 
-  <!-- Правая часть: картинка -->
-  <div class="relative h-[17.5rem] w-full shrink-0 overflow-hidden rounded-2xl lg:h-auto lg:w-[34.9375rem]">
+  <!-- Картинка: на мобиле aspect-[572/350] на всю ширину, на десктопе
+       фиксированная w-34.9375rem справа (flex-row + items-stretch
+       растягивают её по высоте article). -->
+  <div class="relative aspect-[572/350] w-full shrink-0 overflow-hidden rounded-2xl lg:aspect-auto lg:h-auto lg:w-[34.9375rem]">
     <Image
       src={image}
       alt={imageAlt}

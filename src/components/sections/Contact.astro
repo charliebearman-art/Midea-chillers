@@ -47,7 +47,7 @@ const inputs: InputField[] = [
 ];
 ---
 
-<section id="contact" data-fade-banner-trigger class="relative overflow-hidden py-[6.5rem]">
+<section id="contact" data-fade-banner-trigger class="relative overflow-hidden py-12 lg:py-[6.5rem]">
   <!-- Фоновое видео: секция full-width, видео тянется на всю её ширину;
        внутренний div с .container-x держит контент в 1920-пиксельной сетке.
        На viewport > 1920 секция (и видео) выходят за края контейнера. -->
@@ -73,16 +73,16 @@ const inputs: InputField[] = [
   >
   </div>
 
-  <div class="container-x flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
-    <!-- Левая колонка: заголовок + подзаголовок -->
-    <div class="flex flex-1 flex-col gap-4">
-      <h2 data-reveal class="text-h1 font-medium text-text-primary">
+  <div class="container-x flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-16">
+    <!-- Левая колонка: заголовок + подзаголовок. На мобиле — центрирован. -->
+    <div class="flex flex-1 flex-col gap-2 text-center lg:gap-4 lg:text-left">
+      <h2 data-reveal class="text-h2 font-medium text-text-primary lg:text-h1">
         Поможем с&nbsp;выбором!
       </h2>
       <p
         data-reveal
         data-reveal-delay="80"
-        class="max-w-[35rem] text-body text-text-primary"
+        class="text-t12 text-text-primary lg:max-w-[35rem] lg:text-body"
       >
         Заполните форму, мы&nbsp;вам перезвоним и&nbsp;поможем подобрать решение
       </p>
@@ -96,7 +96,7 @@ const inputs: InputField[] = [
       data-reveal-delay="160"
       data-contact-form
       novalidate
-      class="flex min-w-0 flex-1 flex-col gap-12 rounded-3xl bg-black/60 p-12 backdrop-blur-[12px]"
+      class="flex min-w-0 flex-1 flex-col gap-12 rounded-2xl bg-black/60 px-4 py-6 backdrop-blur-[12px] lg:rounded-3xl lg:p-12"
     >
       <!-- Состояние формы: idle / loading. Success и error — через toast
            (см. Toast.astro). После success форма очищается и возвращается
@@ -140,7 +140,7 @@ const inputs: InputField[] = [
             class="dropzone relative flex h-[7.5rem] cursor-pointer flex-col items-start justify-start rounded border-2 border-strong px-[1.125rem] py-3.5 transition-colors hover:border-[#88b9f2]"
           >
             <p class="text-t16 leading-[1.6] text-text-primary">Выберите файл</p>
-            <p class="text-t16 leading-[1.6] text-text-primary">или перетащите его&nbsp;сюда</p>
+            <p class="hidden text-t16 leading-[1.6] text-text-primary lg:block">или перетащите его&nbsp;сюда</p>
             <p class="absolute bottom-3.5 left-[1.125rem] text-t12 text-text-muted">
               Файлы .jpg,.png. Макс. размер 5&nbsp;Мб
             </p>
@@ -175,8 +175,8 @@ const inputs: InputField[] = [
              Native <button> вместо <Button>-компонента — нужен контроль
              над disabled/textContent для loading-состояния. Стили скопированы
              из Button.astro (variant=primary, size=lg). -->
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-12">
-          <p class="flex-1 text-t12 text-text-primary">
+        <div class="flex flex-col-reverse gap-2 lg:flex-row lg:items-center lg:gap-12">
+          <p class="flex-1 text-center text-t12 text-text-primary lg:text-left">
             Нажимая кнопку, вы&nbsp;соглашаетесь с&nbsp;<a
               href="https://air-midea.com/privacy"
               target="_blank"

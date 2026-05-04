@@ -49,8 +49,65 @@ const {
 
 <article
   data-reveal
-  class="relative overflow-hidden rounded-3xl bg-ink-base"
+  class="relative overflow-hidden rounded-2xl bg-ink-base lg:rounded-3xl"
 >
+  <!-- ========== Mobile (figma 894:3323) ==========
+       Image-сверху (h-190) + бейдж справа сверху, серия centered,
+       «Скачать каталог», features-list вертикально, «Характеристики» снизу. -->
+  <div class="flex flex-col gap-6 lg:hidden">
+    <div class="relative h-[11.875rem] w-full overflow-hidden rounded-2xl">
+      <img
+        src={image}
+        alt={imageAlt}
+        width="328"
+        height="190"
+        loading="lazy"
+        decoding="async"
+        class="absolute inset-0 h-full w-full object-cover"
+      />
+      <span
+        class="absolute right-4 top-4 inline-flex items-center rounded px-2 py-1 text-h4 font-medium text-text-primary"
+        style="background-image: linear-gradient(90deg, #81c7ff 0%, #1e8fe9 100%)"
+      >
+        {powerRange}
+      </span>
+    </div>
+    <div class="flex flex-col items-center gap-2 px-4 text-center">
+      <p class="text-t12 font-medium text-text-primary">Серия</p>
+      <p class="text-h3 font-medium text-text-primary">{series}</p>
+    </div>
+    <a
+      href={catalogHref}
+      class="inline-flex items-center justify-center gap-2 px-4 text-t16 font-medium text-text-primary"
+    >
+      Скачать каталог
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true" class="h-4 w-4">
+        <path d="M15.75 13C15.7498 13.9663 14.9664 14.75 14 14.75H2C1.0336 14.75 0.2502 13.9663 0.25 13V9.333C0.2502 8.9189 0.5859 8.583 1 8.583C1.4141 8.583 1.7498 8.9189 1.75 9.333V13C1.7502 13.1379 1.862 13.25 2 13.25H14C14.138 13.25 14.2498 13.1379 14.25 13V9.333C14.2502 8.9189 14.5859 8.583 15 8.583C15.4141 8.583 15.7498 8.9189 15.75 9.333V13ZM11.5303 6.4697C11.8232 6.7626 11.8232 7.2374 11.5303 7.5303L8.5303 10.5303C8.2374 10.8232 7.7626 10.8232 7.4697 10.5303L4.4697 7.5303C4.1768 7.2374 4.1768 6.7626 4.4697 6.4697C4.7626 6.1768 5.2374 6.1768 5.5303 6.4697L7.25 8.1895V2C7.25 1.5858 7.5858 1.25 8 1.25C8.4142 1.25 8.75 1.5858 8.75 2V8.1895L10.4697 6.4697C10.7626 6.1768 11.2374 6.1768 11.5303 6.4697Z"/>
+      </svg>
+    </a>
+    <ul class="flex flex-col gap-6 px-4">
+      {features.map((feature) => (
+        <li class="flex items-start gap-4">
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-strong bg-glass-subtle text-text-primary backdrop-blur-[8px] [&>svg]:h-6 [&>svg]:w-6">
+            <Fragment set:html={feature.icon} />
+          </span>
+          <div class="flex flex-1 flex-col gap-1">
+            <p class="text-body font-medium text-text-primary leading-[1.6]">{feature.title}</p>
+            <p class="text-t12 text-text-primary">{feature.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+    <a
+      href={catalogHref}
+      class="border-t border-white/10 p-4 text-center text-body font-medium text-text-primary"
+    >
+      Характеристики
+    </a>
+  </div>
+
+  <!-- ========== Desktop ========== -->
+  <div class="hidden lg:block">
   <!-- Верх: бейдж + серия + фичи + фон-картинка -->
   <div class="relative isolate flex min-h-[23.75rem] items-center justify-between gap-8 p-8">
     <img
@@ -164,6 +221,7 @@ const {
       </svg>
     </button>
   </div>
+  </div><!-- /desktop -->
 </article>
 
 <style>

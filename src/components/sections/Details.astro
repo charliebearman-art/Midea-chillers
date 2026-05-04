@@ -46,16 +46,18 @@ const items = [
 ];
 ---
 
-<section id="advantages" class="container-x pt-20">
+<section id="advantages" class="container-x py-16 lg:pt-20 lg:pb-0">
+  <!-- На мобиле h2 не sticky, центрирована, размер h2 (24px). На десктопе
+       — h1 (48px), sticky-стек по верху. -->
   <h2
     data-reveal
-    class="mb-12 text-h1 font-medium text-text-primary lg:sticky lg:top-36 lg:z-20"
+    class="mb-6 text-center text-h2 font-medium text-text-primary lg:mb-12 lg:text-left lg:text-h1 lg:sticky lg:top-36 lg:z-20"
   >
     Готовое решение<br />
     <span class="gradient-text">от производителя чиллеров №1</span>
   </h2>
 
-  <div class="details-stack flex flex-col gap-6">
+  <div class="details-stack flex flex-col gap-4 lg:gap-6">
     {items.map((item, idx) => (
       <div class="detail-stack-item" style={`--stack-index: ${idx}`}>
         <DetailItem {...item} />
