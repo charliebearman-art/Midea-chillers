@@ -125,9 +125,9 @@ const features = [
          карточке отступ слева, последней — справа. -->
     <ul class="-mx-4 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {
-        features.map((feature) => (
+        features.map((feature, i) => (
           <li>
-            <FeatureCard image={feature.image} label={feature.label} />
+            <FeatureCard image={feature.image} label={feature.label} index={i} />
           </li>
         ))
       }

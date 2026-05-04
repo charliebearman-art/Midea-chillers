@@ -61,8 +61,13 @@
      визуально расходится с container-padding. */
   --container-pad: 2.5rem;
 
-  /* Кастомные кривые (Emil-style: built-in CSS easings слабые). */
-  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Easing tokens (Emil-style — мягче чем native ease-out).
+     ease-out-expo: главная кривая для reveals и slide-in. Длинный «хвост»
+     замедления, мгновенный старт — даёт ощущение «свободного приземления».
+     ease-out-strong: альтернатива чуть более резкая, для коротких motion'ов
+     (modal open, button press). */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-strong: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
@@ -244,8 +249,8 @@ a {
 /* плавный fade-up при загрузке (CSS-only, без JS) */
 .reveal {
   opacity: 0;
-  transform: translateY(24px);
-  animation: fade-up 0.9s var(--ease-out-strong) forwards;
+  transform: translateY(20px);
+  animation: fade-up 850ms var(--ease-out-expo) forwards;
   animation-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
@@ -257,16 +262,13 @@ a {
   }
 }
 
-/* Word-by-word reveal: только opacity + translateY — оба composited
-   на GPU, не триггерят layout/paint. Раньше использовался filter:blur
-   для softening, но он не GPU-ускорен (PageSpeed-флаг). Эффект
-   мягкости компенсируем чуть большей дистанцией translateY (0.5em
-   вместо 0.4em) + ease-out-strong-кривой. */
+/* Word-by-word reveal: только opacity + translateY (composited на GPU).
+   Дистанция 0.4em + ease-out-expo даёт мягкое появление без filter:blur. */
 .word-reveal {
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.5em);
-  animation: word-reveal-in 800ms var(--ease-out-strong) forwards;
+  transform: translateY(0.4em);
+  animation: word-reveal-in 800ms var(--ease-out-expo) forwards;
   animation-delay: var(--word-delay, 0ms);
   will-change: opacity, transform;
 }
@@ -278,12 +280,14 @@ a {
   }
 }
 
-/* CTA-карточка въезжает с правого края, со скейл 0.94 → 1
-   (Emil: никаких scale(0) — нужен видимый стартовый объём). */
+/* CTA-карточка въезжает с правого края, со скейл 0.96 → 1.
+   Emil-rule: никаких scale(0)/opacity:0-без-видимости — нужен субтильный
+   стартовый объём (96% — почти неотличимый от финала, но чувствуется
+   «дыхание»). */
 .reveal-right {
   opacity: 0;
-  transform: translateX(2.5rem) scale(0.94);
-  animation: reveal-right-in 850ms var(--ease-out-strong) forwards;
+  transform: translateX(2rem) scale(0.96);
+  animation: reveal-right-in 900ms var(--ease-out-expo) forwards;
   animation-delay: var(--reveal-delay, 0ms);
   will-change: opacity, transform;
 }
@@ -295,17 +299,17 @@ a {
   }
 }
 
-/* Эллипс "зажигается" один раз при загрузке, затем подхватывает breathe-loop.
-   Старт со scale(0.4), а не 0 — у воздушного шарика есть форма даже сдутого. */
+/* Эллипс «зажигается» один раз при загрузке, затем подхватывает breathe-loop.
+   Старт со scale(0.5), а не 0 — у воздушного шарика есть форма даже сдутого. */
 .ellipse-ignite {
   animation:
-    ellipse-ignite 1400ms var(--ease-out-strong) forwards,
+    ellipse-ignite 1400ms var(--ease-out-expo) forwards,
     breathe 24s ease-in-out infinite 1400ms;
 }
 
 @keyframes ellipse-ignite {
   from {
-    transform: scale(0.4);
+    transform: scale(0.5);
     opacity: 0;
   }
   to {
@@ -365,13 +369,15 @@ a {
   }
 }
 
-/* reveal-on-scroll: применяется через JS-наблюдатель IntersectionObserver */
+/* reveal-on-scroll: IntersectionObserver добавляет .reveal-in.
+   Дистанция 24px + duration 800ms + ease-out-expo — Emil-style:
+   мягкая, быстрая, «приземляющаяся» анимация без чувства тормоза. */
 [data-reveal] {
   opacity: 0;
-  transform: translateY(40px);
+  transform: translateY(24px);
   transition:
-    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity 800ms var(--ease-out-expo),
+    transform 800ms var(--ease-out-expo);
   will-change: opacity, transform;
 }
 
@@ -380,13 +386,48 @@ a {
   transform: translateY(0);
 }
 
-/* Mobile-only вариант с scale 0.96→1: добавляет «вес» при появлении
-   (Detail-карточки в колонке без sticky-стека). На десктопе остаётся
-   обычный translateY(40)→0, потому что sticky-cascade делает scale
-   избыточным и нарушает иерархию. */
+/* fade-only вариант: только opacity, без translate. Используется для
+   декоративных оверлеев / эллипсов где motion отвлекает. */
+[data-reveal][data-reveal-fade] {
+  transform: none;
+}
+
+/* slide-right вариант: въезд справа (translateX). Подходит для карточек
+   в горизонтальной карусели Projects + любых элементов «next-to-line». */
+[data-reveal][data-reveal-slide-right] {
+  transform: translateX(32px);
+}
+[data-reveal][data-reveal-slide-right].reveal-in {
+  transform: translateX(0);
+}
+
+/* image-scale: внутренние <img>/<video>/[data-reveal-image-target]
+   стартуют с scale(1.04) и приезжают к 1. Эффект «дыхания» — картинка
+   слегка садится в кадр, не дёргается. Затухание opacity 0.85→1 даёт
+   мягкий fade поверх. */
+[data-reveal][data-reveal-image] img,
+[data-reveal][data-reveal-image] video,
+[data-reveal][data-reveal-image] [data-reveal-image-target] {
+  transform: scale(1.04);
+  opacity: 0.85;
+  transition:
+    transform 1100ms var(--ease-out-expo),
+    opacity 700ms var(--ease-out-expo);
+  will-change: transform, opacity;
+}
+[data-reveal][data-reveal-image].reveal-in img,
+[data-reveal][data-reveal-image].reveal-in video,
+[data-reveal][data-reveal-image].reveal-in [data-reveal-image-target] {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Mobile-only вариант с scale 0.97→1: добавляет «вес» при появлении
+   на мобиле (Detail-карточки в колонке без sticky-стека десктопа).
+   Чуть меньше scale (0.97 vs 0.96) для более субтильного эффекта. */
 @media (max-width: 639px) {
   [data-reveal][data-reveal-mobile-scale] {
-    transform: translateY(24px) scale(0.96);
+    transform: translateY(20px) scale(0.97);
   }
   [data-reveal][data-reveal-mobile-scale].reveal-in {
     transform: translateY(0) scale(1);
