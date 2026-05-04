@@ -136,7 +136,7 @@ const {
         <table class="w-max min-w-full border-collapse">
           <thead>
             <tr class="border-b border-white/10 text-left">
-              <th class="sticky left-0 z-10 bg-ink-base px-4 py-3 text-t12 font-normal text-text-primary">Модель</th>
+              <th class="sticky left-0 z-10 w-[10rem] min-w-[10rem] max-w-[10rem] bg-ink-base px-3 py-3 text-t12 font-normal text-text-primary">Модель</th>
               {modelRow.map((m) => (
                 <th class="whitespace-nowrap px-4 py-3 text-t12 font-normal text-text-primary">{m}</th>
               ))}
@@ -145,7 +145,7 @@ const {
           <tbody>
             {[...specs, ...extraSpecs].map((row) => (
               <tr class="border-b border-white/10">
-                <td class="sticky left-0 z-10 bg-ink-base px-4 py-3 text-t12 text-text-primary">{row.label}</td>
+                <td class="sticky left-0 z-10 w-[10rem] min-w-[10rem] max-w-[10rem] whitespace-normal break-words bg-ink-base px-3 py-3 text-t12 leading-[1.4] text-text-primary">{row.label}</td>
                 {row.values.map((v) => (
                   <td class="whitespace-nowrap px-4 py-3 text-t12 text-text-primary">{v}</td>
                 ))}
