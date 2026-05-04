@@ -34,7 +34,7 @@ import VideoModal from "../VideoModal.astro";
        границы на стыке секций (Projects-овский clip раньше создавал шов). -->
   <div
     aria-hidden="true"
-    class="pointer-events-none absolute -bottom-[60%] -right-[10%] size-[88rem] max-w-[120vw] rounded-full bg-[radial-gradient(circle,rgba(50,163,253,0.7)_0%,rgba(50,163,253,0.3)_35%,transparent_70%)] blur-[120px]"
+    class="pointer-events-none absolute -bottom-[60%] -right-[10%] -z-10 size-[88rem] max-w-[120vw] rounded-full bg-[radial-gradient(circle,rgba(50,163,253,0.7)_0%,rgba(50,163,253,0.3)_35%,transparent_70%)] blur-[120px]"
   >
   </div>
 
@@ -79,15 +79,26 @@ import VideoModal from "../VideoModal.astro";
         >
           <source data-src="/videos/numberonesmall.mp4" type="video/mp4" />
         </video>
-        <Button size="md" class="absolute bottom-6 right-6" data-video-trigger>
+        <!-- Mobile: круглая play-кнопка без текста (figma 896:4785).
+             Desktop: pill-кнопка «Смотреть видео» + play-иконка. -->
+        <button
+          type="button"
+          data-video-trigger
+          aria-label="Смотреть видео"
+          class="absolute bottom-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-brand lg:hidden"
+        >
+          <svg viewBox="0 0 14 16" fill="currentColor" aria-hidden="true" class="h-3 w-auto">
+            <path d="M13 7.13397C13.6667 7.51887 13.6667 8.48113 13 8.86603L2 15.2206C1.33333 15.6055 0.5 15.1244 0.5 14.3546L0.5 1.64545C0.5 0.875645 1.33333 0.394521 2 0.779421L13 7.13397Z" />
+          </svg>
+        </button>
+        <Button size="md" class="absolute bottom-6 right-6 hidden lg:inline-flex" data-video-trigger>
           Смотреть видео
           <svg
             slot="icon"
-            width="16"
-            height="16"
             viewBox="0 0 16 16"
             fill="currentColor"
             aria-hidden="true"
+            class="h-4 w-4"
           >
             <path d="M5 3v10l8-5z" />
           </svg>

@@ -314,11 +314,16 @@ a {
   }
 }
 
-/* Sticky-стек для карточек + curtain Products. На мобиле sticky=relative,
-   на lg+ — sticky cascade. pb/mt применяем универсально (на мобиле
-   не вредят — cards в нормальном потоке, лишний pb внизу + Products mt
-   вытаскивается обратно вверх, итого визуально нейтрально).
+/* Sticky-стек для карточек + curtain Products. И на мобиле, и на десктопе —
+   карточки 01-04 залипают одной верхней линией, более поздние карточки
+   z-index перекрывают предыдущие. Различается только top:
+   мобиля = 5rem (header h-16 + 1rem отступ), десктоп = 18.9rem (под h2).
    Брейкпоинт 640 синхронизирован с tailwind.config.mjs (lg: "640px"). */
+.detail-stack-item {
+  position: sticky;
+  top: 5rem; /* 64px header + 16px gap = 80px на мобиле */
+  z-index: calc(10 + var(--stack-index, 0));
+}
 @media (min-width: 640px) {
   html {
     /* Десктопный header h-20 = 80px = 5rem */
@@ -326,13 +331,11 @@ a {
   }
 
   .detail-stack-item {
-    position: sticky;
     /* h2 sticky-top 9rem + h2 height 6.9rem (text-h1 × 1.15 × 2 строки)
        + 3rem (48px gap до карточки, mb-12) = 18.9rem.
        Все 4 карточки залипают на ОДНОЙ ПОЗИЦИИ — стек по верхней линии
        без cascade-смещения, z-index определяет порядок наложения. */
     top: 18.9rem;
-    z-index: calc(10 + var(--stack-index, 0));
   }
 }
 

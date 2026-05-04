@@ -108,7 +108,7 @@ const projects: Project[] = [
     type="button"
     data-modal-close
     aria-label="Закрыть"
-    class="fixed right-10 top-10 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white"
+    class="fixed right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white lg:right-10 lg:top-10"
   >
     <svg width="14" height="14" viewBox="0 0 13.5 13.5" fill="currentColor" aria-hidden="true">
       <path
@@ -182,31 +182,31 @@ const projects: Project[] = [
               />
             </div>
 
-            <div class="flex flex-col gap-4 px-4 text-text-primary">
-              <h3 class="text-h2 font-medium leading-[1.15]">{p.title}</h3>
+            <div class="flex flex-col gap-3 px-2 text-text-primary lg:gap-4 lg:px-4">
+              <h3 class="text-h4 font-medium leading-[1.4] lg:text-h2 lg:leading-[1.15]">{p.title}</h3>
 
               <div class="flex flex-col gap-1">
-                <p class="text-body text-text-primary">Тип объекта</p>
-                <p class="text-t16 font-medium">{p.type}</p>
+                <p class="text-t12 text-text-primary lg:text-body">Тип объекта</p>
+                <p class="text-body font-medium lg:text-t16">{p.type}</p>
               </div>
 
               <div class="flex flex-col gap-1">
-                <p class="text-body text-text-primary">Адрес</p>
-                <p class="text-t16 font-medium">{p.address}</p>
+                <p class="text-t12 text-text-primary lg:text-body">Адрес</p>
+                <p class="text-body font-medium lg:text-t16">{p.address}</p>
               </div>
 
               <div class="flex flex-col gap-2">
-                <p class="text-body text-text-primary">Установленное оборудование</p>
+                <p class="text-t12 text-text-primary lg:text-body">Установленное оборудование</p>
                 <ul class="flex flex-col">
                   {p.equipment.map((e) => (
-                    <li class="flex items-baseline gap-2 py-[2px] text-t16 font-medium">
+                    <li class="flex items-baseline gap-2 py-[2px] text-body font-medium lg:text-t16">
                       <span class="whitespace-nowrap">{e.model}</span>
                       <span class="dotted-leader" aria-hidden="true" />
                       <span class="whitespace-nowrap">{e.qty}</span>
                     </li>
                   ))}
                   {p.total && (
-                    <li class="mt-1 flex items-baseline gap-2 border-t border-white/10 pt-2 text-h3 font-medium">
+                    <li class="mt-1 flex items-baseline gap-2 border-t border-white/10 pt-2 text-h4 font-medium lg:text-h3">
                       <span class="whitespace-nowrap">{p.total.label}</span>
                       <span class="dotted-leader" aria-hidden="true" />
                       <span class="whitespace-nowrap">{p.total.value}</span>
