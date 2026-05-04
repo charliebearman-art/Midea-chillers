@@ -55,12 +55,12 @@ const features: Feature[] = [
   data-feature-modal
   class="feature-modal m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/60 backdrop:backdrop-blur-[12px]"
 >
-  <!-- Close-кнопка фиксирована в правом-верхнем углу viewport, поверх всего. -->
+  <!-- Close-кнопка: на мобиле top-4 right-4 (16px), на десктопе top-10 right-10 (40px). -->
   <button
     type="button"
     data-modal-close
     aria-label="Закрыть"
-    class="fixed right-10 top-10 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white"
+    class="fixed right-4 top-4 z-20 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white lg:right-10 lg:top-10"
   >
     <svg
       width="14"
@@ -88,14 +88,15 @@ const features: Feature[] = [
          absolute -left/-right. Так стрелки всегда «у краёв активной».
          data-modal-content помечает «не-backdrop» зону: клики внутри (карта,
          стрелки) не закрывают модалку, клики снаружи — закрывают. -->
-    <div data-modal-content class="relative w-[32.5rem]">
-      <!-- Prev-arrow: left-[-72px] = 4.5rem за левый край активной карточки. -->
+    <div data-modal-content class="relative w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] lg:w-[32.5rem] lg:max-w-none">
+      <!-- Prev-arrow: на мобиле скрыта (swipe вместо стрелок); на десктопе
+           absolute -left-[4.5rem] = 72px за левый край активной карточки. -->
       <button
         type="button"
         data-modal-prev
         aria-label="Предыдущая"
         disabled
-        class="absolute -left-[4.5rem] top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base opacity-100 transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30"
+        class="absolute -left-[4.5rem] top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base opacity-100 transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30 lg:flex"
       >
         <svg
           width="16"
@@ -118,7 +119,7 @@ const features: Feature[] = [
            translate шло от left:0 wrapper-а (= центр активной). -->
       <div
         data-modal-track
-        class="absolute left-0 top-1/2 flex -translate-y-1/2 gap-6 transition-transform duration-[400ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
+        class="relative flex gap-2 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:absolute lg:left-0 lg:top-1/2 lg:-translate-y-1/2 lg:gap-6 lg:overflow-visible lg:snap-none lg:transition-transform lg:duration-[400ms] lg:[transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
       >
         {
           features.map((feature, i) => (
@@ -126,15 +127,17 @@ const features: Feature[] = [
               data-modal-card
               data-card-index={i}
               data-active={i === 0 ? "true" : "false"}
-              class="relative flex h-[34.4375rem] w-[32.5rem] shrink-0 flex-col gap-6 overflow-hidden rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-6 pt-2 backdrop-blur-[24px]"
+              class="relative flex w-[calc(100vw-2rem)] shrink-0 snap-center flex-col gap-4 overflow-hidden rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-4 pt-2 backdrop-blur-[24px] lg:h-[34.4375rem] lg:w-[32.5rem] lg:gap-6 lg:pb-6"
             >
               {/* Dimmed overlay для неактивных карточек (peek-эффект).
                   pointer-events-none, чтобы не блокировал клики на потенциальных
                   ссылках внутри (на будущее). */}
+              <!-- Peek-overlay только на десктопе: на мобиле виден один кард,
+                   диммирование соседей не нужно. -->
               <span
                 aria-hidden="true"
                 data-modal-overlay
-                class="pointer-events-none absolute inset-0 rounded-3xl bg-black opacity-75 transition-opacity duration-300 ease-out"
+                class="pointer-events-none absolute inset-0 hidden rounded-3xl bg-black opacity-75 transition-opacity duration-300 ease-out lg:block"
               />
               <div class="aspect-[543/342] w-full shrink-0 overflow-hidden rounded-2xl bg-[#313131]">
                 <img
@@ -147,21 +150,21 @@ const features: Feature[] = [
                   class="h-full w-full object-cover"
                 />
               </div>
-              <div class="flex flex-col gap-4 px-4 text-text-primary">
-                <h3 class="text-h2 font-medium">{feature.title}</h3>
-                <p class="text-body">{feature.description}</p>
+              <div class="flex flex-col gap-2 px-2 text-text-primary lg:gap-4 lg:px-4">
+                <h3 class="text-h4 font-medium lg:text-h2">{feature.title}</h3>
+                <p class="text-t12 lg:text-body">{feature.description}</p>
               </div>
             </article>
           ))
         }
       </div>
 
-      <!-- Next-arrow: right-[-72px] -->
+      <!-- Next-arrow: на мобиле скрыта (swipe), на десктопе right-[-72px]. -->
       <button
         type="button"
         data-modal-next
         aria-label="Следующая"
-        class="absolute -right-[4.5rem] top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30"
+        class="absolute -right-[4.5rem] top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30 lg:flex"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
           <path
@@ -182,11 +185,13 @@ const features: Feature[] = [
     opacity: 0;
   }
 
-  /* Track-translate: смещает на N карточек влево от левого края wrapper-а.
-     wrapper.left=0 совпадает с left активной карточки, поэтому translate
-     отрицательный → активная подъезжает к wrapper.left. */
-  [data-modal-track] {
-    transform: translateY(-50%) translateX(calc(-1 * var(--active-index, 0) * (32.5rem + 1.5rem)));
+  /* Track-translate (только десктоп): смещает на N карточек влево от левого
+     края wrapper-а. На мобиле track = native horizontal scroll-snap,
+     transform не нужен. */
+  @media (min-width: 640px) {
+    [data-modal-track] {
+      transform: translateY(-50%) translateX(calc(-1 * var(--active-index, 0) * (32.5rem + 1.5rem)));
+    }
   }
 
   /* Open-анимация native dialog: scale + fade-in 250ms (Эмиль-style).
@@ -288,7 +293,9 @@ const features: Feature[] = [
     });
 
     /** Открытие из Hero feature-cards. Card передаёт data-feature-card={index}
-     *  → берём индекс, ставим active, открываем dialog. */
+     *  → берём индекс, ставим active, открываем dialog. На мобиле scrollLeft
+     *  к offsetLeft активной карты — нужен rAF после showModal,
+     *  иначе track ещё не отрендерен (display:none → block). */
     document.querySelectorAll<HTMLElement>("[data-feature-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.featureCard;
@@ -299,6 +306,12 @@ const features: Feature[] = [
         active = idx;
         update();
         dialog.showModal();
+        if (window.innerWidth < 640) {
+          requestAnimationFrame(() => {
+            const c = cards[active] as HTMLElement | undefined;
+            if (c) track.scrollLeft = c.offsetLeft;
+          });
+        }
       });
     });
   }
