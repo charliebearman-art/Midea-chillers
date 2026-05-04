@@ -1,0 +1,563 @@
+---
+/**
+ * Контактная форма "Поможем с выбором!".
+ * Двухколоночная: заголовок слева, форма справа в виде glass-card
+ * (bg-black/60 + backdrop-blur-12).
+ *
+ * Поля: ФИО*, Телефон*, Комментарий, Прикрепить документ.
+ *
+ * Состояния инпута (по Figma):
+ *  - default: border-strong (rgba(255,255,255,0.16))
+ *  - hover/focus: border #88b9f2 (--border/focus)
+ *  - error: border #ff5752 (--status/error) + видимый <p data-error-text> снизу
+ *
+ * Валидация на submit: ФИО (не пусто), телефон (>= 10 цифр).
+ * Native HTML-валидация выключена через `novalidate` — стилизуем сами.
+ */
+import Button from "../Button.astro";
+
+interface InputField {
+  name: string;
+  label: string;
+  type?: string;
+  placeholder?: string;
+  required?: boolean;
+  errorMessage?: string;
+}
+
+const inputs: InputField[] = [
+  {
+    name: "name",
+    label: "ФИО",
+    required: true,
+    errorMessage: "Укажите ФИО",
+  },
+  {
+    name: "phone",
+    label: "Номер телефона",
+    placeholder: "+7",
+    required: true,
+    type: "tel",
+    errorMessage: "Укажите корректный номер телефона",
+  },
+  {
+    name: "comment",
+    label: "Комментарий",
+  },
+];
+---
+
+<section id="contact" data-fade-banner-trigger class="relative overflow-hidden py-[6.5rem]">
+  <!-- Фоновое видео: секция full-width, видео тянется на всю её ширину;
+       внутренний div с .container-x держит контент в 1920-пиксельной сетке.
+       На viewport > 1920 секция (и видео) выходят за края контейнера. -->
+  <video
+    data-contact-video
+    autoplay
+    muted
+    loop
+    playsinline
+    preload="auto"
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover"
+  >
+    <source src="/videos/backgroundsmall.mp4" type="video/mp4" />
+  </video>
+
+  <!-- Текстурный оверлей поверх видео — тот же dot-pattern, что в Hero
+       (radial-gradient точки, spacing 3px, opacity 0.2). -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute inset-0 -z-10"
+    style="background-image: radial-gradient(circle, rgba(0,0,0,1) 0.4px, transparent 0.7px); background-size: 3px 3px; opacity: 0.2;"
+  >
+  </div>
+
+  <div class="container-x flex flex-col gap-12 lg:flex-row lg:items-start lg:gap-16">
+    <!-- Левая колонка: заголовок + подзаголовок -->
+    <div class="flex flex-1 flex-col gap-4">
+      <h2 data-reveal class="text-h1 font-medium text-text-primary">
+        Поможем с&nbsp;выбором!
+      </h2>
+      <p
+        data-reveal
+        data-reveal-delay="80"
+        class="max-w-[35rem] text-body text-text-primary"
+      >
+        Заполните форму, мы&nbsp;вам перезвоним и&nbsp;поможем подобрать решение
+      </p>
+    </div>
+
+    <!-- Правая колонка: glass-card с формой.
+         data-state управляет UI: idle / loading / success / error.
+         CSS переключает видимость [data-view] и состояние кнопки. -->
+    <form
+      data-reveal
+      data-reveal-delay="160"
+      data-contact-form
+      novalidate
+      class="flex min-w-0 flex-1 flex-col gap-12 rounded-3xl bg-black/60 p-12 backdrop-blur-[12px]"
+    >
+      <!-- Состояние формы: idle / loading. Success и error — через toast
+           (см. Toast.astro). После success форма очищается и возвращается
+           в idle; после error остаётся в idle с сохранёнными данными. -->
+      <div class="flex flex-col gap-12">
+        <div class="flex flex-col gap-6">
+        {
+          inputs.map((field) => (
+            <div data-field class="flex flex-col gap-1">
+              <label for={field.name} class="text-body text-text-primary">
+                {field.label}
+                {field.required && <span class="text-[#ff5752]">{" *"}</span>}
+              </label>
+              <input
+                id={field.name}
+                name={field.name}
+                type={field.type ?? "text"}
+                placeholder={field.placeholder ?? ""}
+                required={field.required}
+                inputmode={field.type === "tel" ? "tel" : undefined}
+                autocomplete={field.type === "tel" ? "tel" : undefined}
+                class="contact-input h-12 w-full rounded border-2 border-strong bg-transparent px-3.5 text-t16 text-text-primary outline-none transition-colors placeholder:text-text-muted hover:border-[#88b9f2] focus:border-[#88b9f2] disabled:cursor-not-allowed disabled:opacity-60"
+              />
+              {field.errorMessage && (
+                <p data-error-text class="text-t12 leading-[1.6] text-[#ff5752]">
+                  {field.errorMessage}
+                </p>
+              )}
+            </div>
+          ))
+        }
+
+        <!-- Drag&drop загрузка файла. По Figma 4 состояния:
+             default / hover (border #88b9f2) / error (border #ff5752 +
+             сообщение снизу) / uploaded (список файлов под дропзоной,
+             каждый с кнопкой удаления). -->
+        <div data-uploader class="flex flex-col gap-1">
+          <span class="text-body text-text-primary">Прикрепить документ</span>
+          <label
+            data-dropzone
+            class="dropzone relative flex h-[7.5rem] cursor-pointer flex-col items-start justify-start rounded border-2 border-strong px-[1.125rem] py-3.5 transition-colors hover:border-[#88b9f2]"
+          >
+            <p class="text-t16 leading-[1.6] text-text-primary">Выберите файл</p>
+            <p class="text-t16 leading-[1.6] text-text-primary">или перетащите его&nbsp;сюда</p>
+            <p class="absolute bottom-3.5 left-[1.125rem] text-t12 text-text-muted">
+              Файлы .jpg,.png. Макс. размер 5&nbsp;Мб
+            </p>
+            <svg
+              class="absolute right-[1.125rem] top-[1.125rem] h-4 w-4 text-text-primary"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 11V1.5M5 4.5l3-3 3 3M2.5 14h11" />
+            </svg>
+            <input
+              type="file"
+              name="files"
+              accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+              multiple
+              data-file-input
+              class="absolute inset-0 cursor-pointer opacity-0"
+              aria-label="Прикрепить файл"
+            />
+          </label>
+          <ul data-files-list class="mt-2 flex flex-col gap-2"></ul>
+          <p data-uploader-error class="mt-1 hidden text-t12 leading-[1.6] text-[#ff5752]"></p>
+        </div>
+        </div>
+
+        <!-- Согласие на обработку ПД + кнопка отправки.
+             Native <button> вместо <Button>-компонента — нужен контроль
+             над disabled/textContent для loading-состояния. Стили скопированы
+             из Button.astro (variant=primary, size=lg). -->
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-12">
+          <p class="flex-1 text-t12 text-text-primary">
+            Нажимая кнопку, вы&nbsp;соглашаетесь с&nbsp;<a
+              href="https://air-midea.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="underline transition-colors hover:text-brand-light"
+              >политикой конфиденциальности</a
+            >
+          </p>
+          <button
+            type="submit"
+            data-submit-btn
+            class="group inline-flex h-12 flex-1 items-center justify-center rounded-lg bg-brand px-5 text-[0.875rem] font-medium text-white transition-colors duration-300 ease-out hover:bg-[#EFF2F5] hover:text-text-inverse focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 disabled:cursor-wait disabled:opacity-70 disabled:hover:bg-brand disabled:hover:text-white"
+          >
+            <span data-submit-label>Отправить</span>
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<style>
+  /* Error state на инпуте: красная рамка + видимый текст ошибки. */
+  [data-field] [data-error-text] {
+    display: none;
+  }
+  [data-field][data-error="true"] .contact-input,
+  [data-field][data-error="true"] .contact-input:hover,
+  [data-field][data-error="true"] .contact-input:focus {
+    border-color: #ff5752;
+  }
+  [data-field][data-error="true"] [data-error-text] {
+    display: block;
+  }
+
+  /* Dropzone — состояние перетаскивания файла поверх (border #88b9f2). */
+  [data-dropzone][data-dragover="true"] {
+    border-color: #88b9f2;
+  }
+  /* Dropzone — error (превышен размер / неверный формат). */
+  [data-uploader][data-error="true"] [data-dropzone],
+  [data-uploader][data-error="true"] [data-dropzone]:hover {
+    border-color: #ff5752;
+  }
+  [data-uploader][data-error="true"] [data-uploader-error] {
+    display: block;
+  }
+  /* Dropzone — disabled (на время loading формы): no hover, cursor-not-allowed,
+     приглушённая opacity. По тому же паттерну, что для disabled инпутов. */
+  [data-dropzone][data-disabled="true"],
+  [data-dropzone][data-disabled="true"]:hover {
+    cursor: not-allowed;
+    opacity: 0.6;
+    border-color: var(--border-strong);
+  }
+</style>
+
+<script>
+  // При prefers-reduced-motion ставим фоновое видео на паузу.
+  {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const video = document.querySelector<HTMLVideoElement>("[data-contact-video]");
+    if (reduce && video) video.pause();
+  }
+
+  const form = document.querySelector<HTMLFormElement>("[data-contact-form]");
+  if (form) {
+    const setError = (input: HTMLInputElement, hasError: boolean) => {
+      const wrapper = input.closest<HTMLElement>("[data-field]");
+      if (!wrapper) return;
+      if (hasError) wrapper.dataset.error = "true";
+      else delete wrapper.dataset.error;
+    };
+
+    /**
+     * Маска RU-номера: достаём только цифры из value, нормализуем
+     * (если первая 8 — меняем на 7; если не 7 — добавляем 7-префикс),
+     * форматируем как "+7 XXX XXX-XX-XX". Любые нецифры (буквы, символы)
+     * автоматически отфильтровываются — поле принимает только цифры.
+     */
+    const formatPhone = (input: HTMLInputElement) => {
+      let digits = input.value.replace(/\D/g, "");
+      if (!digits) {
+        input.value = "";
+        return;
+      }
+      if (digits[0] === "8") digits = "7" + digits.slice(1);
+      if (digits[0] !== "7") digits = "7" + digits;
+      digits = digits.slice(0, 11);
+
+      let formatted = "+7";
+      if (digits.length > 1) formatted += " " + digits.slice(1, 4);
+      if (digits.length > 4) formatted += " " + digits.slice(4, 7);
+      if (digits.length > 7) formatted += "-" + digits.slice(7, 9);
+      if (digits.length > 9) formatted += "-" + digits.slice(9, 11);
+
+      input.value = formatted;
+    };
+
+    const phone = form.querySelector<HTMLInputElement>('[name="phone"]');
+    if (phone) {
+      phone.addEventListener("input", () => formatPhone(phone));
+      // На фокус пустого поля подставляем "+7 " — пользователю видно
+      // куда вводить и что префикс уже стоит.
+      phone.addEventListener("focus", () => {
+        if (!phone.value) phone.value = "+7 ";
+      });
+      phone.addEventListener("blur", () => {
+        if (phone.value === "+7" || phone.value === "+7 ") phone.value = "";
+      });
+    }
+
+    const validate = () => {
+      let valid = true;
+      const name = form.querySelector<HTMLInputElement>('[name="name"]');
+      const phoneInput = form.querySelector<HTMLInputElement>('[name="phone"]');
+
+      if (name) {
+        const empty = !name.value.trim();
+        setError(name, empty);
+        if (empty) valid = false;
+      }
+
+      if (phoneInput) {
+        const trimmed = phoneInput.value.trim();
+        // Полный RU-номер: 11 цифр (7 + 10 цифр номера).
+        const digits = trimmed.replace(/\D/g, "");
+        const invalid = !trimmed || digits.length < 11;
+        setError(phoneInput, invalid);
+        if (invalid) valid = false;
+      }
+
+      return valid;
+    };
+
+    /* ---------- Loading-состояние + toast на success/error ---------- */
+    const submitBtn = form.querySelector<HTMLButtonElement>("[data-submit-btn]");
+    const submitLabel = form.querySelector<HTMLElement>("[data-submit-label]");
+
+    const setLoading = (loading: boolean) => {
+      if (submitBtn) submitBtn.disabled = loading;
+      if (submitLabel) submitLabel.textContent = loading ? "Отправляем…" : "Отправить";
+      form.querySelectorAll<HTMLInputElement>(".contact-input").forEach((input) => {
+        input.disabled = loading;
+      });
+      // Дропзона: дизейблим input[type=file] + помечаем wrapper data-атрибутом
+      // (CSS снимает hover/cursor-pointer и приглушает opacity, см. <style>).
+      form.querySelectorAll<HTMLInputElement>("[data-file-input]").forEach((input) => {
+        input.disabled = loading;
+      });
+      form.querySelectorAll<HTMLElement>("[data-dropzone]").forEach((zone) => {
+        if (loading) zone.dataset.disabled = "true";
+        else delete zone.dataset.disabled;
+      });
+    };
+
+    /** Сброс формы целиком: поля + uploader + fokus на ФИО. */
+    const resetForm = () => {
+      form.reset();
+      form.querySelectorAll<HTMLElement>("[data-uploader]").forEach((u) => {
+        const list = u.querySelector<HTMLUListElement>("[data-files-list]");
+        const errEl = u.querySelector<HTMLElement>("[data-uploader-error]");
+        if (list) list.innerHTML = "";
+        if (errEl) errEl.textContent = "";
+        delete u.dataset.error;
+      });
+    };
+
+    /** Mock-отправка 1200ms. Когда подключите backend — замените на fetch:
+     *    const res = await fetch('/api/contact', { method: 'POST', body: new FormData(form) });
+     *    return { ok: res.ok }; */
+    const submitForm = async (): Promise<{ ok: boolean }> => {
+      const params = new URLSearchParams(window.location.search);
+      const forced = params.get("test-form"); // ?test-form=success|error|loading
+      await new Promise((r) => window.setTimeout(r, forced === "loading" ? 999999 : 1200));
+      if (forced === "error") return { ok: false };
+      return { ok: true };
+    };
+
+    type ToastFn = (opts: {
+      type: "success" | "error";
+      title: string;
+      description?: string;
+    }) => void;
+    const toast = (window as unknown as { toast?: ToastFn }).toast;
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!validate()) {
+        form
+          .querySelector<HTMLInputElement>('[data-field][data-error="true"] .contact-input')
+          ?.focus();
+        return;
+      }
+      setLoading(true);
+      try {
+        const res = await submitForm();
+        if (res.ok) {
+          toast?.({
+            type: "success",
+            title: "Заявка отправлена",
+            description: "Спасибо! Свяжемся с вами в течение часа в рабочее время.",
+          });
+          resetForm();
+        } else {
+          toast?.({
+            type: "error",
+            title: "Не удалось отправить",
+            description: "Что-то пошло не так. Попробуйте отправить ещё раз через минуту.",
+          });
+        }
+      } catch (err) {
+        toast?.({
+          type: "error",
+          title: "Не удалось отправить",
+          description: "Что-то пошло не так. Попробуйте отправить ещё раз через минуту.",
+        });
+        console.error("Contact form failed", err);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    /** ?test-form=success|error на загрузке — показывает toast без submit
+     *  для визуальной проверки. ?test-form=loading проверяется через submit.
+     *  setTimeout 100ms — страховка от случая, когда модуль Contact'а
+     *  бандлится перед Toast'овским; даём window.toast зарегистрироваться. */
+    {
+      const params = new URLSearchParams(window.location.search);
+      const forced = params.get("test-form");
+      window.setTimeout(() => {
+        const t = (window as unknown as { toast?: ToastFn }).toast;
+        if (forced === "success") {
+          t?.({
+            type: "success",
+            title: "Заявка отправлена",
+            description: "Спасибо! Свяжемся с вами в течение часа в рабочее время.",
+          });
+        } else if (forced === "error") {
+          t?.({
+            type: "error",
+            title: "Не удалось отправить",
+            description: "Что-то пошло не так. Попробуйте отправить ещё раз через минуту.",
+          });
+        }
+      }, 100);
+    }
+
+    // Снимаем ошибку при первом изменении значения.
+    form.querySelectorAll<HTMLInputElement>(".contact-input").forEach((input) => {
+      input.addEventListener("input", () => setError(input, false));
+    });
+
+    /* ---------- Dropzone: реальное прикрепление файлов ---------- */
+    const uploaders = form.querySelectorAll<HTMLElement>("[data-uploader]");
+    uploaders.forEach((uploader) => {
+      const fileInput = uploader.querySelector<HTMLInputElement>("[data-file-input]");
+      const dropzone = uploader.querySelector<HTMLElement>("[data-dropzone]");
+      const list = uploader.querySelector<HTMLUListElement>("[data-files-list]");
+      const errorEl = uploader.querySelector<HTMLElement>("[data-uploader-error]");
+      if (!fileInput || !dropzone || !list || !errorEl) return;
+
+      const MAX_SIZE = 5 * 1024 * 1024; // 5 МБ
+      const ACCEPTED_TYPES = ["image/jpeg", "image/jpg", "image/png"];
+      const ACCEPTED_EXT = /\.(jpe?g|png)$/i;
+
+      const files: File[] = [];
+
+      const setUploaderError = (msg: string | null) => {
+        if (msg) {
+          uploader.dataset.error = "true";
+          errorEl.textContent = msg;
+        } else {
+          delete uploader.dataset.error;
+          errorEl.textContent = "";
+        }
+      };
+
+      const escapeHtml = (s: string) =>
+        s
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+
+      // Иконка крестика — Figma "Navigation/close_medium" 16×16.
+      const closeIcon = `
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true">
+          <path d="M3.5 3.5l9 9M12.5 3.5l-9 9" />
+        </svg>`;
+
+      const renderList = () => {
+        list.innerHTML = "";
+        files.forEach((file, idx) => {
+          const li = document.createElement("li");
+          li.className =
+            "relative flex h-12 items-center justify-between gap-3 rounded border-2 border-strong px-[1.125rem]";
+          // min-w-0 + flex-1 на <p> — без них truncate не работает внутри
+          // flex-контейнера (длинное имя растягивает форму).
+          li.innerHTML = `
+            <p class="min-w-0 flex-1 truncate text-t16 leading-[1.6] text-text-primary">${escapeHtml(file.name)}</p>
+            <button type="button" data-remove="${idx}" class="shrink-0 text-text-primary transition-colors hover:text-brand-light" aria-label="Удалить файл">
+              ${closeIcon}
+            </button>`;
+          list.appendChild(li);
+        });
+
+        // Синхронизируем настоящий <input type="file"> с массивом files —
+        // чтобы FormData содержала правильный набор при сабмите.
+        const dt = new DataTransfer();
+        files.forEach((f) => dt.items.add(f));
+        fileInput.files = dt.files;
+      };
+
+      const validateFile = (file: File): string | null => {
+        const okType = ACCEPTED_TYPES.includes(file.type) || ACCEPTED_EXT.test(file.name);
+        if (!okType) return "Допустимые форматы: .jpg, .png";
+        if (file.size > MAX_SIZE) return "Файл больше 5 Мб";
+        return null;
+      };
+
+      const addFiles = (incoming: FileList | File[]) => {
+        let firstError: string | null = null;
+        for (const file of Array.from(incoming)) {
+          const err = validateFile(file);
+          if (err) {
+            firstError = firstError ?? err;
+            continue;
+          }
+          // Не добавляем дубликаты по имени+размеру.
+          const dup = files.some((f) => f.name === file.name && f.size === file.size);
+          if (!dup) files.push(file);
+        }
+        setUploaderError(firstError);
+        renderList();
+      };
+
+      // Click → open native picker (label оборачивает <input>, родной механизм).
+      // Тут только обработчик change.
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files && fileInput.files.length) {
+          addFiles(fileInput.files);
+          // Очищаем value, чтобы повторный выбор того же файла снова сработал.
+          fileInput.value = "";
+        }
+      });
+
+      // Drag & drop.
+      const stop = (e: Event) => {
+        e.preventDefault();
+        e.stopPropagation();
+      };
+      ["dragenter", "dragover"].forEach((ev) =>
+        dropzone.addEventListener(ev, (e) => {
+          stop(e);
+          dropzone.dataset.dragover = "true";
+        }),
+      );
+      ["dragleave", "dragend"].forEach((ev) =>
+        dropzone.addEventListener(ev, (e) => {
+          stop(e);
+          delete dropzone.dataset.dragover;
+        }),
+      );
+      dropzone.addEventListener("drop", (e) => {
+        stop(e);
+        delete dropzone.dataset.dragover;
+        const dt = (e as DragEvent).dataTransfer;
+        if (dt?.files) addFiles(dt.files);
+      });
+
+      // Удаление файла из списка.
+      list.addEventListener("click", (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>("[data-remove]");
+        if (!btn) return;
+        const idx = Number(btn.dataset.remove);
+        if (Number.isNaN(idx)) return;
+        files.splice(idx, 1);
+        setUploaderError(null);
+        renderList();
+      });
+    });
+  }
+</script>

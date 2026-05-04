@@ -1,0 +1,174 @@
+---
+/**
+ * FAQ-секция «Остались вопросы?» (figma 748:3190).
+ * Заголовок text-h1 + 4 аккордеон-карточки.
+ *
+ * Архитектура: НЕ используем нативный <details>/<summary>, потому что
+ * браузер скрывает body слишком резко (display:none / content-visibility),
+ * и grid-template-rows transition не успевает отработать. Вместо этого —
+ * <button> + <div> с data-open атрибутом, JS переключает atr, CSS
+ * анимирует grid-rows 0fr↔1fr + opacity текста + ротацию иконки.
+ *
+ * Hover-анимация: бордер не переключаем через `transition-colors` (CSS
+ * интерполирует через грязный промежуточный цвет), а накладываем
+ * absolute-overlay с border-brand и fade-in opacity 300ms — даёт чистый
+ * crossfade без артефактов.
+ */
+
+interface Item {
+  question: string;
+  answer: string;
+}
+
+const items: Item[] = [
+  {
+    question: "Горят сроки?",
+    answer: "Срок производства чиллера со встроенным гидромодулем с российских заводов 4–6 месяцев, а из Европы из 6–8 месяцев. Поставку заказного гидромодуля ждать минимум 1 месяц. Нужен чиллер с низкотемпературным комплектом (до −40 °C). Мы предлагаем отгрузку на следующий день после оплаты!",
+  },
+  {
+    question: "Высокая цена?",
+    answer: "Заказной выносной гидромодуль по стоимости почти равен цене за чиллер? Европейские и российские чиллеры со встроенным гидромодулем существенно дороже чем модели без него. Модульные чиллеры Midea со встроенным гидромодулем всего на 15% дороже.",
+  },
+  {
+    question: "Проблема с размещением выносного ГМ?",
+    answer: "Чиллер идёт на замену, нужно вписаться в габариты площадки. В проекте не предусмотрели место и теперь некуда ставить выносной гидромодуль. Встроенный гидромодуль экономит место и упрощает монтаж.",
+  },
+  {
+    question: "Нужно эксклюзивное решение?",
+    answer: "Конкурируем с дешёвыми китайскими модульными чиллерами? Снова перепроектировали на OEM Midea? Инверторные модульные чиллеры Midea со встроенным гидромодулем со склада в Москве только в «Даичи».",
+  },
+];
+---
+
+<section id="faq" class="relative py-20">
+  <!-- Ambient glow эллипс по figma 748:3189: left=861, top=23, size=1158
+       на 1440-мастере. Через right-based позиционирование выезжает на 579px
+       за правый край (-36.1875rem) — видимая часть меньше чем у Banner-эллипса,
+       это и есть "меньше по фигме и располагается ниже" из ТЗ.
+       overflow:visible (дефолт) у section пропускает ellipse вниз в соседнюю
+       FinalCta-секцию — figma 748:3188 объединяет FAQ+FinalCta под одним
+       glow-фоном, мы воспроизводим эффект через bleed. -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute right-[-36.1875rem] top-[1.4375rem] -z-10 h-[72.375rem] w-[72.375rem] rounded-full bg-brand-dark/70 blur-[11.25rem]"
+  >
+  </div>
+
+  <div class="container-x flex flex-col gap-12">
+    <h2 data-reveal class="text-h1 font-medium text-text-primary">
+      Остались вопросы?
+    </h2>
+
+    <ul class="flex flex-col gap-2">
+      {
+        items.map((item, idx) => (
+          <li>
+            <div
+              data-faq-item
+              data-open="false"
+              data-reveal
+              data-reveal-delay={idx * 80}
+              class="faq-item group relative rounded-xl border-2 border-strong bg-glass-deep backdrop-blur-[12px]"
+            >
+              {/* Hover-overlay: fade-in border-brand через opacity 300ms.
+                  inset -2px компенсирует border-2 родителя — overlay рисует свой
+                  border ПОВЕРХ, иначе на ховере были бы видны оба борта одновременно. */}
+              <span
+                aria-hidden="true"
+                class="pointer-events-none absolute -inset-[2px] rounded-xl border-2 border-brand opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
+              />
+
+              <button
+                type="button"
+                data-faq-toggle
+                aria-expanded="false"
+                class="relative flex w-full cursor-pointer items-center gap-6 px-6 py-8 text-left"
+              >
+                <span class="flex-1 text-h4 font-medium text-text-primary">
+                  {item.question}
+                </span>
+                <span class="faq-icon flex h-4 w-4 shrink-0 items-center justify-center text-text-primary transition-transform duration-300 ease-out">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <line
+                      x1="8"
+                      y1="2"
+                      x2="8"
+                      y2="14"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                    <line
+                      x1="2"
+                      y1="8"
+                      x2="14"
+                      y2="8"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                </span>
+              </button>
+              <div class="faq-body">
+                <div class="overflow-hidden">
+                  <p class="px-6 pb-8 text-body text-text-primary">
+                    {item.answer}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  /* Smooth open/close animation: grid 0fr → 1fr трюк. Контейнер всегда в
+     потоке, контролируем высоту через CSS grid. Inner overflow-hidden
+     обязателен, иначе на промежуточных кадрах контент "вылезает" наружу.
+     Easing cubic-bezier(0.32, 0.72, 0, 1) — iOS-стиль (плавный старт,
+     расслабленный финиш), 400ms — комфортно для глаз без ощущения тормоза. */
+  .faq-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 400ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  /* Inner-content opacity-fade синхронно с grid-rows — текст не "впрыгивает"
+     резко на финальном кадре, а проявляется по мере раскрытия панели. */
+  .faq-body > div {
+    opacity: 0;
+    transition: opacity 300ms ease-out 100ms; /* 100ms задержка → ждём пока высота начнёт расти */
+  }
+  [data-faq-item][data-open="true"] .faq-body {
+    grid-template-rows: 1fr;
+  }
+  [data-faq-item][data-open="true"] .faq-body > div {
+    opacity: 1;
+  }
+  [data-faq-item][data-open="true"] .faq-icon {
+    transform: rotate(45deg);
+  }
+</style>
+
+<script>
+  const items = document.querySelectorAll<HTMLElement>("[data-faq-item]");
+  items.forEach((item) => {
+    const toggle = item.querySelector<HTMLButtonElement>("[data-faq-toggle]");
+    if (!toggle) return;
+    toggle.addEventListener("click", () => {
+      const isOpen = item.dataset.open === "true";
+      const next = isOpen ? "false" : "true";
+      item.dataset.open = next;
+      toggle.setAttribute("aria-expanded", next);
+    });
+  });
+</script>

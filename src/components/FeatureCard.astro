@@ -1,0 +1,42 @@
+---
+interface Props {
+  image: string;
+  alt?: string;
+  label: string;
+  href?: string;
+  /** Индекс для модалки-сториз: openModal(index) при клике (см. FeatureModal). */
+  index?: number;
+}
+
+const { image, alt = "", label, href, index } = Astro.props;
+const Tag = href ? "a" : "button";
+---
+
+<Tag
+  href={href}
+  data-feature-card={index !== undefined ? String(index) : undefined}
+  class="group relative block h-[7.375rem] w-[7.375rem] shrink-0 rounded-2xl border-[0.125rem] border-pill transition-[border-color,box-shadow] duration-300 ease-out hover:border-[#5FB8FF] hover:shadow-[0_0_24px_rgba(255,255,255,0.25),0_0_40px_rgba(30,143,233,0.5),0_0_56px_rgba(129,199,255,0.4)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:h-[11.875rem] lg:w-[11.875rem]"
+>
+  <span
+    class="absolute inset-[0.125rem] overflow-hidden rounded-xl"
+  >
+    <img
+      src={image}
+      alt={alt}
+      width="182"
+      height="182"
+      loading="lazy"
+      decoding="async"
+      class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+    />
+    <span
+      class="absolute inset-0 bg-[linear-gradient(0deg,rgba(0,0,0,0.95)_0%,transparent_53%)]"
+      aria-hidden="true"
+    ></span>
+    <span
+      class="absolute bottom-1.5 left-1.5 right-1.5 text-left text-[0.625rem] font-medium leading-[1.2] text-white lg:bottom-3 lg:left-3 lg:right-3 lg:text-body"
+    >
+      {label}
+    </span>
+  </span>
+</Tag>

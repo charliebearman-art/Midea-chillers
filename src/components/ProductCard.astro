@@ -1,0 +1,348 @@
+---
+/**
+ * Карточка модельного ряда:
+ * - Верх (380px): фон-картинка, бейдж мощности + название серии слева,
+ *   4 фичи справа.
+ * - Низ: таблица спецификаций — модель + базовые строки видны всегда.
+ *   Кнопка "Показать все" раскрывает `extraSpecs`, иконка крутится 180°.
+ *
+ * Раньше был <details>/<summary> с summary в КОНЦЕ — это невалидно
+ * (summary должен быть первым ребёнком), браузер прятал таблицу под
+ * автогенерированным "Details ▶". Заменено на data-state + JS toggle.
+ */
+interface Feature {
+  icon: string;       // имя иконки (см. <FeatureIcon /> внизу)
+  title: string;
+  text: string;
+}
+
+interface SpecRow {
+  label: string;
+  values: string[];
+}
+
+interface Props {
+  powerRange: string;       // "70 — 164 кВт"
+  series: string;           // "AQUA THERMAL GM"
+  catalogHref?: string;     // ссылка на каталог
+  image: string;            // фоновая картинка (чиллер на фоне)
+  imageAlt?: string;
+  features: Feature[];
+  modelRow: string[];       // верхняя строка таблицы — модели
+  specs: SpecRow[];         // строки спецификаций (видимы всегда)
+  /** Доп. строки таблицы — раскрываются кнопкой "Показать все". */
+  extraSpecs?: SpecRow[];
+}
+
+const {
+  powerRange,
+  series,
+  catalogHref = "#",
+  image,
+  imageAlt = "",
+  features,
+  modelRow,
+  specs,
+  extraSpecs = [],
+} = Astro.props;
+---
+
+<article
+  data-reveal
+  class="relative overflow-hidden rounded-3xl bg-ink-base"
+>
+  <!-- Верх: бейдж + серия + фичи + фон-картинка -->
+  <div class="relative isolate flex min-h-[23.75rem] items-center justify-between gap-8 p-8">
+    <img
+      data-product-img
+      src={image}
+      alt={imageAlt}
+      width="1360"
+      height="380"
+      loading="lazy"
+      decoding="async"
+      class="pointer-events-none absolute inset-0 -z-10 h-full w-full rounded-3xl object-cover will-change-transform"
+      style="transform: scale(var(--img-scale, 1.2))"
+    />
+
+    <!-- Левая колонка: бейдж + серия + ссылка на каталог -->
+    <div class="flex h-full min-h-[19.75rem] w-[16.25rem] shrink-0 flex-col justify-between">
+      <div class="flex flex-col gap-6">
+        <span
+          class="inline-flex w-fit items-center rounded-xl px-4 py-2 text-h4 font-medium text-text-primary"
+          style="background-image: linear-gradient(90deg, #81c7ff 0%, #1e8fe9 100%)"
+        >
+          {powerRange}
+        </span>
+        <div class="flex flex-col gap-2">
+          <p class="text-body font-medium text-text-primary">Серия</p>
+          <p class="text-h2 font-medium text-text-primary">{series}</p>
+        </div>
+      </div>
+
+      <a
+        href={catalogHref}
+        class="group inline-flex items-center gap-2 text-t16 font-medium text-text-primary"
+      >
+        Скачать каталог
+        <svg
+          width="16" height="16" viewBox="0 0 16 16" fill="currentColor"
+          class="transition-transform duration-300 group-hover:translate-y-px"
+          aria-hidden="true"
+        >
+          <path d="M15.75 13C15.7498 13.9663 14.9664 14.75 14 14.75H2C1.0336 14.75 0.2502 13.9663 0.25 13V9.333C0.2502 8.9189 0.5859 8.583 1 8.583C1.4141 8.583 1.7498 8.9189 1.75 9.333V13C1.7502 13.1379 1.862 13.25 2 13.25H14C14.138 13.25 14.2498 13.1379 14.25 13V9.333C14.2502 8.9189 14.5859 8.583 15 8.583C15.4141 8.583 15.7498 8.9189 15.75 9.333V13ZM11.5303 6.4697C11.8232 6.7626 11.8232 7.2374 11.5303 7.5303L8.5303 10.5303C8.2374 10.8232 7.7626 10.8232 7.4697 10.5303L4.4697 7.5303C4.1768 7.2374 4.1768 6.7626 4.4697 6.4697C4.7626 6.1768 5.2374 6.1768 5.5303 6.4697L7.25 8.1895V2C7.25 1.5858 7.5858 1.25 8 1.25C8.4142 1.25 8.75 1.5858 8.75 2V8.1895L10.4697 6.4697C10.7626 6.1768 11.2374 6.1768 11.5303 6.4697Z"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Правая колонка: фичи -->
+    <ul class="flex w-[27.5rem] shrink-0 flex-col gap-6">
+      {features.map((feature) => (
+        <li class="flex items-start gap-4">
+          <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-strong bg-glass-subtle text-text-primary backdrop-blur-[8px] [&>svg]:h-6 [&>svg]:w-6">
+            <Fragment set:html={feature.icon} />
+          </span>
+          <div class="flex flex-col gap-1">
+            <p class="text-t16 leading-[1.4] font-medium text-text-primary">{feature.title}</p>
+            <p class="text-body text-text-primary">{feature.text}</p>
+          </div>
+        </li>
+      ))}
+    </ul>
+  </div>
+
+  <!-- Таблица спецификаций -->
+  <div data-specs-block data-expanded="false" class="p-8">
+    <table class="w-full border-collapse">
+      <thead>
+        <tr class="border-b border-white/10 text-left">
+          <th class="w-[15.625rem] pb-2 text-t12 font-normal text-text-primary">Модель</th>
+          {modelRow.map((m) => (
+            <th class="pb-2 pl-4 text-t12 font-normal text-text-primary">{m}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {specs.map((row) => (
+          <tr class="border-b border-white/10">
+            <td class="w-[15.625rem] py-4 text-body text-text-primary">{row.label}</td>
+            {row.values.map((v) => (
+              <td class="py-4 pl-4 text-body text-text-primary">{v}</td>
+            ))}
+          </tr>
+        ))}
+        {extraSpecs.map((row, i) => (
+          <tr
+            data-extra-row
+            style={`--row-i: ${i}`}
+            class="border-b border-white/10"
+          >
+            <td class="w-[15.625rem] py-4 text-body text-text-primary">{row.label}</td>
+            {row.values.map((v) => (
+              <td class="py-4 pl-4 text-body text-text-primary">{v}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+
+    <button
+      type="button"
+      data-toggle
+      aria-expanded="false"
+      class="flex w-full cursor-pointer items-center justify-center gap-4 border-b border-white/10 p-4 text-body font-medium text-text-primary transition-colors hover:bg-white/[0.04]"
+    >
+      <span data-toggle-label-show>Показать все</span>
+      <span data-toggle-label-hide>Свернуть</span>
+      <svg
+        data-toggle-icon
+        width="16" height="16" viewBox="0 0 16 16" fill="currentColor"
+        class="transition-transform duration-300"
+        aria-hidden="true"
+      >
+        <path fill-rule="evenodd" clip-rule="evenodd" d="M11.4697 6.4697C11.7626 6.1768 12.2373 6.1768 12.5302 6.4697C12.8231 6.7626 12.8231 7.2373 12.5302 7.5302L8.5302 11.5302C8.2373 11.8231 7.7626 11.8231 7.4697 11.5302L3.4697 7.5302C3.1768 7.2373 3.1768 6.7626 3.4697 6.4697C3.7626 6.1768 4.2373 6.1768 4.5302 6.4697L7.9999 9.9394L11.4697 6.4697Z"/>
+      </svg>
+    </button>
+  </div>
+</article>
+
+<style>
+  /* Анимация раскрытия/свёртки extra-строк через transition cell-properties:
+     padding-y, font-size, border-bottom-width идут от 0 (свёрнуто) к
+     полным значениям (раскрыто), плюс opacity. Высота <tr> зависит от
+     padding+font ячеек, поэтому каждая строка плавно «сдувается»/«надувается»,
+     и общая высота таблицы (а значит и блока с кнопкой) меняется
+     по той же кривой. Никаких inline-style и rAF — браузер сам
+     интерполирует, нативный scroll-anchoring keeps кнопку на месте. */
+  /* Свёртка/раскрытие — единая timeline 360ms с одной кривой
+     cubic-bezier(0.32, 0.72, 0, 1). JS использует тот же bezier для
+     управляемого scroll'а — оба процесса идут синхронно, без stagger,
+     без отставания доскролла от сжатия. */
+  [data-extra-row] {
+    transition:
+      opacity 360ms cubic-bezier(0.32, 0.72, 0, 1),
+      border-bottom-width 360ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  [data-extra-row] td {
+    transition:
+      padding 360ms cubic-bezier(0.32, 0.72, 0, 1),
+      font-size 360ms cubic-bezier(0.32, 0.72, 0, 1),
+      border-width 360ms cubic-bezier(0.32, 0.72, 0, 1);
+    overflow: hidden;
+  }
+  /* Раскрытое состояние: opacity 1, ячейки в нормальном виде (значения
+     уже заданы tailwind-ом py-4, text-body, border на <tr>). */
+  [data-specs-block][data-expanded="true"] [data-extra-row] {
+    opacity: 1;
+  }
+  /* Свёрнутое состояние: ячейка ужимается до 0 высоты — нулевые
+     padding-y, font-size 0 (текст исчезает не «обрезкой», а сжатием),
+     border-bottom 0 (граница тоже схлопывается). */
+  [data-specs-block][data-expanded="false"] [data-extra-row] {
+    opacity: 0;
+    pointer-events: none;
+    /* Бордер на самом <tr> (Tailwind class `border-b`) тоже сжимаем —
+       иначе 16 нулевых строк × 1px = 16-pixel «жирная полоса» над
+       кнопкой Показать все. */
+    border-bottom-width: 0;
+  }
+  [data-specs-block][data-expanded="false"] [data-extra-row] td {
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 0;
+    line-height: 0;
+    border-bottom-width: 0;
+  }
+  /* Stagger убран: чтобы CSS-сжатие строк и JS-driven scroll шли
+     1-в-1 в одной timeline, без расхождения. */
+
+  /* Лейблы кнопки переключаются между состояниями. */
+  [data-specs-block][data-expanded="true"] [data-toggle-label-show],
+  [data-specs-block][data-expanded="false"] [data-toggle-label-hide] {
+    display: none;
+  }
+  [data-specs-block][data-expanded="true"] [data-toggle-icon] {
+    transform: rotate(180deg);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>("[data-specs-block]").forEach((block) => {
+    const button = block.querySelector<HTMLButtonElement>("[data-toggle]");
+    if (!button) return;
+
+    // CSS отвечает за визуальное сжатие <tr> через transition на cell-
+    // properties (padding/font-size/border-width). JS управляет только
+    // data-expanded и синхронным scroll'ом при свёртке.
+
+    /** Кубический Безье из строки CSS: возвращает функцию progress(0..1)
+     *  → eased(0..1). Используем то же значение, что и CSS-transition
+     *  на ячейках — так JS-driven scroll и CSS-driven сжатие строк
+     *  идут точно в одном темпе, без расхождения. */
+    const bezier = (p1x: number, p1y: number, p2x: number, p2y: number) => {
+      const cubic = (a: number, b: number, t: number) =>
+        3 * (1 - t) * (1 - t) * t * a + 3 * (1 - t) * t * t * b + t * t * t;
+      return (x: number) => {
+        if (x <= 0) return 0;
+        if (x >= 1) return 1;
+        // Newton-Raphson: ищем t такое, что cubic(p1x, p2x, t) = x.
+        let t = x;
+        for (let i = 0; i < 8; i++) {
+          const cx = cubic(p1x, p2x, t);
+          const dcx =
+            3 * (1 - t) * (1 - t) * p1x +
+            6 * (1 - t) * t * (p2x - p1x) +
+            3 * t * t * (1 - p2x);
+          if (Math.abs(dcx) < 1e-6) break;
+          t -= (cx - x) / dcx;
+          t = Math.max(0, Math.min(1, t));
+        }
+        return cubic(p1y, p2y, t);
+      };
+    };
+    const ease = bezier(0.32, 0.72, 0, 1);
+    const COLLAPSE_DUR = 360;
+
+    button.addEventListener("click", () => {
+      const expanded = block.dataset.expanded === "true";
+      const newState = !expanded;
+
+      if (newState) {
+        // Раскрытие: чисто CSS, без скролл-anchor'а — extras появляются
+        // ВНУТРИ блока ниже visible specs, кнопка естественно уезжает вниз
+        // вместе с новым контентом, что соответствует ожиданиям.
+        block.dataset.expanded = "true";
+        button.setAttribute("aria-expanded", "true");
+        return;
+      }
+
+      // Свёртка с per-frame scroll-anchor:
+      //  • CSS-transition на cell-properties плавно сжимает строки → кнопка
+      //    реально движется в document вверх.
+      //  • Каждый кадр читаем button.getBoundingClientRect() и подгоняем
+      //    scrollTop так, чтобы viewport-позиция кнопки оставалась той же,
+      //    что и в момент клика. Никакой расчётной кривой — догоняем по
+      //    факту изменения layout, поэтому всегда в синхроне с CSS.
+      //  • На время цикла отключаем `scroll-behavior: smooth` на html,
+      //    иначе scrollBy становится smooth-animation и наши
+      //    мелкие per-frame корректировки складываются в крупный лаг.
+      const targetTop = button.getBoundingClientRect().top;
+      const startTime = performance.now();
+      const html = document.documentElement;
+      const prevScrollBehavior = html.style.scrollBehavior;
+      html.style.scrollBehavior = "auto";
+
+      block.dataset.expanded = "false";
+      button.setAttribute("aria-expanded", "false");
+
+      const tick = (now: number) => {
+        const cur = button.getBoundingClientRect().top;
+        const delta = cur - targetTop;
+        if (Math.abs(delta) > 0.5) window.scrollBy(0, delta);
+        if (now - startTime < COLLAPSE_DUR + 60) {
+          requestAnimationFrame(tick);
+        } else {
+          html.style.scrollBehavior = prevScrollBehavior;
+        }
+      };
+      requestAnimationFrame(tick);
+    });
+  });
+
+  // Scroll-driven zoom-out картинок: scale 1.2 пока центр картинки ниже
+  // середины viewport, плавно к 1.0 когда доходит до середины (и выше).
+  // overflow-hidden у <article> кропит лишние 20% — края не вылезают.
+  const productImages = document.querySelectorAll<HTMLImageElement>("[data-product-img]");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if (productImages.length) {
+    if (reducedMotion) {
+      productImages.forEach((img) => img.style.setProperty("--img-scale", "1"));
+    } else {
+      let ticking = false;
+      const update = () => {
+        const halfVh = window.innerHeight / 2;
+        productImages.forEach((img) => {
+          const rect = img.getBoundingClientRect();
+          const center = rect.top + rect.height / 2;
+          // distance > halfVh — картинка ниже viewport-середины (scale 1.2)
+          // distance ≤ 0 — картинка по центру или выше (scale 1.0)
+          const distance = center - halfVh;
+          const progress = Math.min(1, Math.max(0, 1 - distance / halfVh));
+          const scale = 1.2 - progress * 0.2;
+          img.style.setProperty("--img-scale", scale.toFixed(4));
+        });
+        ticking = false;
+      };
+      const onScroll = () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", update, { passive: true });
+      update();
+    }
+  }
+</script>

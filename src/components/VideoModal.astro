@@ -1,0 +1,131 @@
+---
+/**
+ * Модалка с rutube-видео. Открывается из Order («Смотреть видео»).
+ *
+ * iframe `src` устанавливается лениво — только при первом открытии:
+ *  - не грузим rutube при первом рендере страницы (≈400 KB трафика),
+ *  - не запускаем autoplay в фоне до того как пользователь кликнул.
+ * При закрытии `src` сбрасывается, чтобы видео остановилось и не
+ *  играло в фоне (rutube-плеер не имеет `pause()` API через postMessage).
+ *
+ * Стиль наследуется от FeatureModal/ProjectModal: тот же backdrop blur+dim,
+ * та же close-кнопка (figma 410:898), то же mousedown/mouseup-ловление
+ * клика по фону.
+ */
+const VIDEO_URL = "https://rutube.ru/play/embed/f54b027bc9a7043dd7dbcde8145aaeab/?skinColor=32A3FD";
+---
+
+<dialog
+  data-video-modal
+  class="video-modal m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/60 backdrop:backdrop-blur-[12px]"
+>
+  <button
+    type="button"
+    data-modal-close
+    aria-label="Закрыть"
+    class="fixed right-10 top-10 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white"
+  >
+    <svg width="14" height="14" viewBox="0 0 13.5 13.5" fill="currentColor" aria-hidden="true">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M12.2197 0.21967C12.5126 -0.07321 12.9874 -0.07321 13.2803 0.21967C13.5731 0.51256 13.5731 0.98744 13.2803 1.28033L7.81066 6.75L13.2803 12.2197C13.5731 12.5126 13.5731 12.9874 13.2803 13.2803C12.9874 13.5731 12.5126 13.5731 12.2197 13.2803L6.75 7.81066L1.28033 13.2803C0.98744 13.5731 0.51256 13.5731 0.21967 13.2803C-0.07321 12.9874 -0.07321 12.5126 0.21967 12.2197L5.68934 6.75L0.21967 1.28033C-0.07321 0.98744 -0.07321 0.51256 0.21967 0.21967C0.51256 -0.07321 0.98744 -0.07321 1.28033 0.21967L6.75 5.68934L12.2197 0.21967Z"
+      />
+    </svg>
+  </button>
+
+  <div class="flex h-full w-full items-center justify-center px-4 py-10 lg:px-8">
+    <div data-modal-content class="w-full max-w-[64rem]">
+      <div class="aspect-video w-full overflow-hidden rounded-2xl bg-black">
+        <iframe
+          data-video-frame
+          src={VIDEO_URL}
+          loading="lazy"
+          allow="clipboard-write; autoplay"
+          allowfullscreen
+          class="h-full w-full"
+          style="border: 0"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .video-modal[open] {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity 250ms cubic-bezier(0.32, 0.72, 0, 1),
+      transform 250ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @starting-style {
+    .video-modal[open] {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  .video-modal[open]::backdrop {
+    opacity: 1;
+    transition: opacity 250ms ease-out;
+  }
+  @starting-style {
+    .video-modal[open]::backdrop {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  const VIDEO_URL =
+    "https://rutube.ru/play/embed/f54b027bc9a7043dd7dbcde8145aaeab/?skinColor=32A3FD";
+  const dialog = document.querySelector<HTMLDialogElement>("[data-video-modal]");
+  const frame = dialog?.querySelector<HTMLIFrameElement>("[data-video-frame]");
+  const closeBtn = dialog?.querySelector<HTMLButtonElement>("[data-modal-close]");
+
+  if (dialog && frame && closeBtn) {
+    /** При первом открытии iframe уже имеет src (отрендерен из props) —
+     *  rutube НЕ автоплеит, пока пользователь не кликнул на iframe или не
+     *  получил user-gesture на странице. После клика по триггеру autoplay
+     *  через `allow="autoplay"` сработает. Если src был очищен на close,
+     *  снова устанавливаем при следующем открытии. */
+    const open = () => {
+      if (frame.src !== VIDEO_URL) frame.src = VIDEO_URL;
+      dialog.showModal();
+    };
+    const close = () => {
+      // Сброс src останавливает видео (плеер выгружается).
+      frame.src = "about:blank";
+      dialog.close();
+    };
+
+    closeBtn.addEventListener("click", close);
+    dialog.addEventListener("close", () => {
+      // На случай закрытия через Esc — тоже останавливаем видео.
+      if (frame.src !== "about:blank") frame.src = "about:blank";
+    });
+
+    // Backdrop-click через mousedown/mouseup (тот же паттерн).
+    let mouseDownOnBackdrop = false;
+    dialog.addEventListener("mousedown", (e) => {
+      const t = e.target as HTMLElement;
+      mouseDownOnBackdrop =
+        !t.closest("[data-modal-content]") && !t.closest("[data-modal-close]");
+    });
+    dialog.addEventListener("mouseup", (e) => {
+      const t = e.target as HTMLElement;
+      const inContent = t.closest("[data-modal-content]");
+      const inClose = t.closest("[data-modal-close]");
+      if (mouseDownOnBackdrop && !inContent && !inClose) close();
+      mouseDownOnBackdrop = false;
+    });
+
+    // Открытие из любых элементов с data-video-trigger.
+    document.querySelectorAll<HTMLElement>("[data-video-trigger]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.preventDefault();
+        open();
+      });
+    });
+  }
+</script>

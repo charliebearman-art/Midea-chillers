@@ -1,0 +1,51 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Header from "../components/Header.astro";
+import Banner from "../components/sections/Banner.astro";
+import Hero from "../components/sections/Hero.astro";
+import Details from "../components/sections/Details.astro";
+import Products from "../components/sections/Products.astro";
+import Contact from "../components/sections/Contact.astro";
+import Order from "../components/sections/Order.astro";
+import Projects from "../components/sections/Projects.astro";
+import BusinessSolutions from "../components/sections/BusinessSolutions.astro";
+import Faq from "../components/sections/Faq.astro";
+import FinalCta from "../components/sections/FinalCta.astro";
+---
+
+<Layout>
+  <Header />
+
+  <main class="pt-16 lg:pt-20">
+    <Banner />
+    <Hero />
+    <Details />
+    <Products />
+    <Contact />
+    <Order />
+    <!-- Wrapper для sticky-curtain эффекта Projects → BusinessSolutions.
+         Projects (sticky top-20) залипает у шапки только пока этот контейнер
+         тянется ниже — когда BusinessSolutions полностью перекрывает Projects
+         и контейнер заканчивается, sticky отпускает Projects, и она уезжает
+         вверх вместе с BS. Без wrapper-а контейнинг-блок = main, sticky
+         висит до футера и Projects вылезает из-под BS на следующих секциях.
+
+         id="projects" на этом wrapper-е (а не на самой Projects-секции),
+         чтобы anchor-навигация (#projects из меню шапки) работала
+         предсказуемо. У sticky-элементов getBoundingClientRect() возвращает
+         visual position, а не natural — когда Projects scrolled-past и
+         unstuck, scrollIntoView промахивается на дельту = (visual − natural).
+         Wrapper статичный → rect.top = natural top, scroll работает чисто. -->
+    <div id="projects">
+      <Projects />
+      <BusinessSolutions />
+    </div>
+    <Faq />
+    <FinalCta />
+  </main>
+</Layout>
+
+<!-- reveal-on-scroll: единый IntersectionObserver на всех data-reveal элементах -->
+<script>
+  import "../lib/reveal.ts";
+</script>

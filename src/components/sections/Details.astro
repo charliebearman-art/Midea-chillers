@@ -1,0 +1,64 @@
+---
+import DetailItem from "../DetailItem.astro";
+
+const items = [
+  {
+    number: "01",
+    highlight: "На 45% дешевле,",
+    title: "чем чиллер + отдельный гидромодуль",
+    description: "Готовое решение из наличия: не нужно заказывать, ждать и проектировать гидромодуль отдельно.",
+    image: "/images/detail-01.jpg",
+    imageAlt: "Сравнение стоимости — экономия 45%",
+  },
+  {
+    number: "02",
+    highlight: "Проще проектировать —",
+    title: "меньше ошибок на объекте",
+    description: "Встроенный гидромодуль изготавливается на производстве, поставляется в комплекте с чиллером и средствами автоматизации, прошедшими заводские испытания.",
+    image: "/images/detail-02.jpg",
+    imageAlt: "Заводская сборка чиллера",
+  },
+  {
+    number: "03",
+    highlight: "Вдвое компактнее —",
+    title: "для объектов с дефицитом площади",
+    description: "Интеграция гидромодуля в корпус сокращает занимаемую площадь на 50% по сравнению с раздельной компоновкой.",
+    image: "/images/detail-03.jpg",
+    imageAlt: "Компактная конструкция",
+  },
+  {
+    number: "04",
+    highlight: "До 16 модулей в группе —",
+    title: "масштабируйте систему под задачу",
+    description: [
+      "Поэтапное наращивание мощности без замены оборудования",
+      "Сохранение работоспособности системы при проведении сервисного обслуживания",
+      "Равномерная нагрузка на кровлю — не требуется дорогостоящее усиление конструкции",
+      "Компактные модули легче поднять наверх — можно использовать строительный лифт",
+    ],
+    image: "/images/detail-04.jpg",
+    imageAlt: "Модульная установка на крыше",
+  },
+];
+---
+
+<section id="advantages" class="container-x pt-20">
+  <h2
+    data-reveal
+    class="mb-12 text-h1 font-medium text-text-primary lg:sticky lg:top-36 lg:z-20"
+  >
+    Готовое решение<br />
+    <span class="gradient-text">от производителя чиллеров №1</span>
+  </h2>
+
+  <div class="details-stack flex flex-col gap-6">
+    {items.map((item, idx) => (
+      <div class="detail-stack-item" style={`--stack-index: ${idx}`}>
+        <DetailItem {...item} />
+      </div>
+    ))}
+    <!-- Спейсер: добавляет content-box высоту контейнера, чтобы card 04
+         могла залипать (sticky констрейнится content-box, не padding-box) -->
+    <div aria-hidden="true" class="details-spacer hidden lg:block"></div>
+  </div>
+</section>

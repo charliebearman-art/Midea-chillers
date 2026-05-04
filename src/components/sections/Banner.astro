@@ -1,0 +1,124 @@
+---
+import MorphPill from "../MorphPill.astro";
+import Button from "../Button.astro";
+
+// Cascade-stagger 60ms между словами H1 — заметно, но не тормозит чтение.
+const headlineWords = [
+  { text: "Модульные", delay: 100 },
+  { text: "чиллеры",   delay: 160 },
+  { text: "Midea",     delay: 220 },
+];
+const gradientLineDelay = 320;
+const subtitleDelay = 480;
+const ctaDelay = 360;
+---
+
+<section class="relative">
+  <!-- Декоративный голубой эллипс-свечение справа сверху.
+       Wrapper фиксирует positioning + opacity-transition; внутренний div
+       несёт визуал + breath-анимацию (которая сама пульсирует opacity
+       между 0.6→1.0). Wrapper opacity мультиплицируется поверх — когда
+       BusinessSolutions появляется в viewport, JS гасит wrapper до 0.
+       Размеры: mobile 486px (30.375rem на 360-мастере) → desktop 1158px
+       (72.375rem на 1440-мастере). -->
+  <div
+    aria-hidden="true"
+    data-banner-ellipse
+    class="pointer-events-none fixed -top-[15.1875rem] right-[-15.1875rem] -z-10 h-[30.375rem] w-[30.375rem] transition-opacity duration-700 ease-out lg:-top-[18.75rem] lg:right-[-12.5rem] lg:h-[72.375rem] lg:w-[72.375rem]"
+  >
+    <div
+      class="ellipse-ignite h-full w-full rounded-full bg-brand-dark/70 blur-[4.6875rem] lg:blur-[11.25rem]"
+    >
+    </div>
+  </div>
+
+  <div class="container-x relative pb-4 pt-8 lg:py-16">
+    <div class="flex flex-col items-center gap-6 lg:flex-row lg:items-end lg:gap-12">
+      <!-- Левая часть: бейджи + (заголовок + подзаголовок).
+           На мобиле центрируется; на десктопе flex-1 + items-start (наследуется
+           через items-end родителя — снаружи влияет только на baseline-аligning). -->
+      <div class="flex w-full flex-col items-center gap-6 lg:flex-1 lg:items-start">
+        <!-- На мобиле — две статические плашки рядом (figma 750:3717,
+             каждый pill 30px высотой, padding 12/5). -->
+        <div class="reveal flex w-full flex-wrap items-center justify-center gap-2 lg:hidden" style="--reveal-delay: 0ms">
+          <span class="inline-flex h-[1.875rem] items-center gap-2 rounded-pill border-[1.5px] border-pill px-3 text-body font-medium text-text-primary">
+            <img src="/images/icon-star.svg" alt="" loading="eager" width="19" height="20" class="h-[1.25rem] w-auto" />
+            <span>Эксклюзив</span>
+          </span>
+          <span class="inline-flex h-[1.875rem] items-center gap-2 rounded-pill border-[1.5px] border-pill px-3 text-body font-medium text-text-primary">
+            <img src="/images/icon-bolt.svg" alt="" loading="eager" width="13" height="18" class="h-[1.25rem] w-auto" />
+            <span>Уже на&nbsp;складе</span>
+          </span>
+        </div>
+        <div class="reveal hidden lg:block" style="--reveal-delay: 0ms">
+          <MorphPill />
+        </div>
+
+        <div class="flex w-full flex-col gap-3">
+          <h1 class="w-full text-center font-bold text-display-xl text-text-primary lg:text-left">
+            {headlineWords.map((w, i) => (
+              <>
+                <span class="word-reveal" style={`--word-delay: ${w.delay}ms`}>{w.text}</span>{i < headlineWords.length - 1 ? " " : null}
+              </>
+            ))}
+            <br />
+            <span class="word-reveal gradient-text" style={`--word-delay: ${gradientLineDelay}ms`}>
+              со&nbsp;встроенным гидромодулем
+            </span>
+          </h1>
+
+          <p
+            class="word-reveal w-full max-w-[35rem] text-center text-body font-medium text-text-primary lg:text-h4 lg:text-left"
+            style={`--word-delay: ${subtitleDelay}ms`}
+          >
+            Уникальное техническое решение для&nbsp;рынка РФ
+          </p>
+        </div>
+      </div>
+
+      <!-- Правая часть: CTA-карточка дистрибьютора. На мобиле скрыта —
+           её содержимое (Daichi-карточка + CTA) на мобиле живёт в Hero,
+           см. Hero.astro: они там идут под видео в фигма 750:3736+750:3737. -->
+      <aside
+        class="reveal-right hidden w-full max-w-[24.875rem] rounded-3xl border-2 border-strong bg-glass-card p-6 backdrop-blur-glass lg:block"
+        style={`--reveal-delay: ${ctaDelay}ms`}
+      >
+        <div class="flex flex-col items-center gap-4">
+          <img
+            src="/images/logo-daichi.svg"
+            alt="Daichi"
+            width="120"
+            height="22"
+            class="h-[1.375rem] w-auto"
+          />
+          <p class="text-center text-body text-text-primary">
+            «Даичи» — дистрибьютор №&nbsp;1<br />
+            по&nbsp;поставкам чиллеров Midea
+          </p>
+        </div>
+        <Button href="#contact" fullWidth class="mt-4">
+          Оставить заявку
+        </Button>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<script>
+  /** Banner-эллипс гаснет, когда BusinessSolutions появляется в viewport.
+   *  IntersectionObserver с threshold:0 — fade-out срабатывает при первом
+   *  пикселе trigger в кадре; при скролле обратно вверх эллипс плавно
+   *  возвращается. transition-opacity 700ms ease-out на wrapper. */
+  const ellipse = document.querySelector<HTMLElement>("[data-banner-ellipse]");
+  const trigger = document.querySelector<HTMLElement>("[data-fade-banner-trigger]");
+
+  if (ellipse && trigger) {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        ellipse.style.opacity = entry.isIntersecting ? "0" : "";
+      },
+      { threshold: 0 }
+    );
+    observer.observe(trigger);
+  }
+</script>

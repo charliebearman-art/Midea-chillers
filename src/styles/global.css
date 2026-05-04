@@ -1,0 +1,379 @@
+/* ---------- Tailwind ---------- */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Шрифты ----------
+   Gotham Pro — платный, положи woff2 в /public/fonts/
+   До тех пор fallback на Manrope (Google Fonts) — близкий по характеру.
+*/
+@font-face {
+  font-family: "Gotham Pro";
+  src: url("/fonts/GothamPro-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gotham Pro";
+  src: url("/fonts/GothamPro-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Gotham Pro";
+  src: url("/fonts/GothamPro-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Manrope (fallback) подключается через <link> в Layout.astro для лучшего перфа */
+
+/* ---------- CSS-переменные дизайн-системы ---------- */
+:root {
+  --brand: #32a3fd;
+  --brand-light: #81c7ff;
+  --brand-dark: #1e8fe9;
+
+  --ink-900: #0a0d12;
+  --ink-800: #10141b;
+  --ink-700: #171c25;
+
+  --text-primary: #ebf0f4;
+  --text-muted: rgba(235, 240, 244, 0.64);
+  --text-subtle: rgba(235, 240, 244, 0.4);
+
+  --border-strong: rgba(255, 255, 255, 0.16);
+  --border-soft: rgba(255, 255, 255, 0.08);
+  --border-pill: rgba(255, 255, 255, 0.3);
+
+  --glass-card: rgba(0, 0, 0, 0.2);
+  --glass-surface: rgba(255, 255, 255, 0.1);
+
+  /* Контент тянется до 1920, дальше — фикс с центрированием */
+  --container-max: 1920px;
+  /* Боковые поля в rem, чтобы скейлились синхронно с font-size:
+     2.5rem = 40px на 1440-мастере, на 640 = 17.78px (44%), на 1920 = 53.3px (133%).
+     Если оставить в px/vw, padding скейлится в другом ритме чем rem-based UI
+     (font 1.111vw vs pad 4vw → разные коэффициенты), и весь rem-based layout
+     визуально расходится с container-padding. */
+  --container-pad: 2.5rem;
+}
+
+/* ---------- Base ---------- */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: #0f1115;
+  color: var(--text-primary);
+  font-family: "Gotham Pro", "Manrope", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  /* Клипаем горизонтальный overflow на root: body { overflow-x: clip }
+     не работает для position:fixed детей (Banner-эллипс с right:-15rem),
+     которые расширяют layout viewport и заставляют шапку растянуться
+     до 1080px на iPhone XR. clip (а не hidden) не создаёт scroll-
+     container — sticky-секции не ломаются. */
+  overflow-x: clip;
+  /* Anchor-навигация (#projects и т.п.) скроллит так, чтобы element.top
+     был на 5rem ниже viewport-top — иначе fixed-header (h-20 = 80px)
+     перекрывает заголовок секции. На мобиле header h-16 = 64px,
+     scroll-padding 4rem; смена через @media. */
+  scroll-padding-top: 4rem;
+  /* Чисто пропорциональный скейлинг от 1440-мастера в обе стороны.
+     Формула 1.111vw даёт font-size = W * 16/1440, поэтому весь rem-based
+     UI на любом viewport в [640..1920] = scaled копия 1440-макета:
+       1440 → 16px    (мастер, baseline)
+       1920 → 21.33px (133%-копия, scaled-up)
+       640  → 7.11px  (44%-копия, scaled-down)
+       >1920 → 21.33px (cap, без раздувания дальше)
+     Ниже 640 — отдельный мобильный 360-мастер, см. @media ниже. */
+  font-size: clamp(7.11px, 1.111vw, 21.33px);
+}
+
+/* Мобильный диапазон 360-639. Аналогично десктопу, но мастер = 360px, 1rem = 16px.
+   Формула 4.444vw = W * 16/360. Slope мобилки в 4× круче десктопной (1.111vw),
+   поэтому единым clamp на оба диапазона не объединить — нужен @media.
+     360 → 16px    (мобильный мастер)
+     639 → 28.4px  (177%, scaled-up)
+     <360 → 16px (cap, не сжимаем дальше)
+   На границе 640 шрифт прыгает с ~28.4px (мобильный) на ~7.11px (десктоп).
+   Это намеренно: на 640 layout полностью переключается с мобильного дизайна
+   на «уменьшенный 1440», у них разные пропорции и анкеры. */
+@media (max-width: 639px) {
+  html {
+    font-size: clamp(16px, 4.444vw, 28.4px);
+  }
+  /* Боковые поля на мобиле: 16px на 360-мастере → 1rem (масштабируется с font-size). */
+  :root {
+    --container-pad: 1rem;
+  }
+  /* Мобильная типографическая шкала из Figma 750:3643. Переопределяем
+     только font-size; line-height/letter-spacing наследуются из Tailwind-
+     утилит text-h*. Source-order: эти правила идут после @tailwind utilities,
+     поэтому при той же specificity побеждают мобильные значения. */
+  .text-h1 {
+    font-size: 1.875rem;
+  } /* 30px на 360-мастере (vs 48px desktop) */
+  .text-h2 {
+    font-size: 1.5rem;
+  } /* 24px (vs 32px desktop) */
+  .text-h3 {
+    font-size: 1.25rem;
+  } /* 20px (vs 24px desktop) */
+  .text-h4 {
+    font-size: 1rem;
+  } /* 16px (vs 18px desktop) */
+  .text-display-xl {
+    font-size: 1.875rem;
+  } /* H1-уровень — на мобиле = h1 */
+}
+
+/* Когда открыта любая нативная модалка (<dialog>[open]) — блокируем скролл
+   фона. Native showModal() сам по себе делает background inert, но не
+   запрещает прокрутку html — текст за модалкой всё равно крутится колесом
+   мыши/тачем. :has() поддерживается во всех современных браузерах
+   (Chrome 105+, Safari 15.4+, Firefox 121+). */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  /* `clip` (а не `hidden`) обрезает горизонтальный overflow от глоу-эллипсов,
+     но НЕ создаёт scroll-container — это критично для `position: sticky` на
+     шапке. С `overflow-x: hidden` Safari (и иногда Chrome) делает body
+     scroll-container'ом, и sticky-элементы перестают «прилипать» к viewport. */
+  overflow-x: clip;
+  isolation: isolate;
+  /* Сплошной #0f1115 (= bg-ink-base) — обязан совпадать с Order's bg-ink-base,
+     иначе на стыке Order/Projects (где Projects прозрачный) виден шов между
+     Order's solid bg и body's gradient-tinted bg. Радиальные glow убраны,
+     ambient-свечение даёт только Banner-эллипс. */
+  background: #0f1115;
+}
+
+img,
+picture,
+video,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Цвет выделения текста — брэнд-синий 32A3FD на любом элементе. */
+::selection {
+  background-color: #32a3fd;
+  color: #ffffff;
+}
+::-moz-selection {
+  background-color: #32a3fd;
+  color: #ffffff;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- Учитываем prefers-reduced-motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Утилиты ---------- */
+.container-x {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: var(--container-pad);
+}
+
+.gradient-text {
+  background: linear-gradient(90deg, var(--brand-light), var(--brand-dark));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Унифицированные булиты: длинное тире вместо disc.
+   Используется в DetailItem (карточка преимуществ 04) и BusinessSolutions
+   (блок «Найдём решение для любого бизнеса»). */
+.dash-list {
+  list-style: none;
+  padding-left: 0;
+}
+.dash-list > li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+.dash-list > li::before {
+  content: "—";
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+/* ---------- Кастомные кривые (Emil-style: built-in CSS easings слабые) ---------- */
+:root {
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* плавный fade-up при загрузке (CSS-only, без JS) */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  animation: fade-up 0.9s var(--ease-out-strong) forwards;
+  animation-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+@keyframes fade-up {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Word-by-word reveal с blur-mask: blur маскирует переход между state-ами,
+   глаз видит единое мягкое появление вместо двух кадров. */
+.word-reveal {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.4em);
+  filter: blur(6px);
+  animation: word-reveal-in 800ms var(--ease-out-strong) forwards;
+  animation-delay: var(--word-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+
+@keyframes word-reveal-in {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* CTA-карточка въезжает с правого края, со скейл 0.94 → 1
+   (Emil: никаких scale(0) — нужен видимый стартовый объём). */
+.reveal-right {
+  opacity: 0;
+  transform: translateX(2.5rem) scale(0.94);
+  animation: reveal-right-in 850ms var(--ease-out-strong) forwards;
+  animation-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+
+@keyframes reveal-right-in {
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Эллипс "зажигается" один раз при загрузке, затем подхватывает breathe-loop.
+   Старт со scale(0.4), а не 0 — у воздушного шарика есть форма даже сдутого. */
+.ellipse-ignite {
+  animation:
+    ellipse-ignite 1400ms var(--ease-out-strong) forwards,
+    breathe 24s ease-in-out infinite 1400ms;
+}
+
+@keyframes ellipse-ignite {
+  from {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+}
+
+/* Sticky-стек для карточек + curtain Products. На мобиле sticky=relative,
+   на lg+ — sticky cascade. pb/mt применяем универсально (на мобиле
+   не вредят — cards в нормальном потоке, лишний pb внизу + Products mt
+   вытаскивается обратно вверх, итого визуально нейтрально).
+   Брейкпоинт 640 синхронизирован с tailwind.config.mjs (lg: "640px"). */
+@media (min-width: 640px) {
+  html {
+    /* Десктопный header h-20 = 80px = 5rem */
+    scroll-padding-top: 5rem;
+  }
+
+  .detail-stack-item {
+    position: sticky;
+    /* h2 sticky-top 9rem + h2 height 6.9rem (text-h1 × 1.15 × 2 строки)
+       + 3rem (48px gap до карточки, mb-12) = 18.9rem.
+       Все 4 карточки залипают на ОДНОЙ ПОЗИЦИИ — стек по верхней линии
+       без cascade-смещения, z-index определяет порядок наложения. */
+    top: 18.9rem;
+    z-index: calc(10 + var(--stack-index, 0));
+  }
+}
+
+/* Спейсер + Products mt подобраны математически:
+   1) Дают 80px видимый зазор между card 04 и Products bg-top.
+   2) В case 3 card_top = products_top геометрически (когда |mt| = card_height),
+      поэтому card 04 ПОЛНОСТЬЮ покрыта Products — никакой видимой полоски.
+   Формула: spacer = card_height + желаемый_gap - gap-6 = 22.375 + 5 - 1.5 = 25.875.
+   mt = -card_height = -22.375rem. */
+.details-spacer {
+  height: 25.875rem;
+  flex-shrink: 0;
+}
+
+.products-curtain {
+  position: relative;
+  z-index: 30;
+}
+
+/* Curtain-overlay только на десктопе: margin-top -22.375rem втягивает Products
+   под последнюю карточку sticky-стека Details. На мобиле sticky отключён
+   (см. @media min-width 640 выше), карточки в нормальном потоке — отрицательный
+   margin спрятал бы их за Products. Поэтому curtain-эффект скоупим в lg+. */
+@media (min-width: 640px) {
+  .products-curtain {
+    margin-top: -22.375rem;
+  }
+}
+
+/* reveal-on-scroll: применяется через JS-наблюдатель IntersectionObserver */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+[data-reveal].reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,130 @@
+---
+/**
+ * Toast-уведомления в стиле Sonner (Emil Kowalski).
+ *
+ * Архитектура:
+ *  - Один portal-контейнер `[data-toast-portal]` на странице (рендерится
+ *    один раз в Layout). Все тосты инжектятся туда через JS-API.
+ *  - Глобальный API: `window.toast({ type, title, description })`.
+ *    Возвращает дескриптор тоста (на будущее — programmatic dismiss).
+ *  - Анимация: slide-up + fade-in 250ms cubic-bezier(0.32, 0.72, 0, 1)
+ *    (iOS-style ease). При закрытии — slide-up + fade-out 200ms ease-out.
+ *    CSS-transition (не keyframe) — interruptible: если новый toast
+ *    приходит во время exit-анимации старого, нет рывка.
+ *  - Auto-dismiss: 4.5s по умолчанию, можно переопределить через
+ *    `duration` в опциях. 0 → не закрывается автоматически.
+ *  - Position: top-center, под header (top-20 десктоп, top-16 мобайл),
+ *    max-w-[400px]. На мобайле прижимается к краям с inset-x-4.
+ *
+ * Accessibility: каждый toast — `role="status" aria-live="polite"`
+ * (success) или `role="alert" aria-live="assertive"` (error). Screen
+ * reader объявляет автоматически.
+ */
+---
+
+<div
+  data-toast-portal
+  aria-live="polite"
+  class="pointer-events-none fixed inset-x-4 top-20 z-[60] mx-auto flex max-w-[400px] flex-col gap-2 lg:top-24 lg:inset-x-0"
+>
+</div>
+
+<script>
+  type ToastType = "success" | "error";
+  interface ToastOptions {
+    type: ToastType;
+    title: string;
+    description?: string;
+    duration?: number; // ms, 0 = sticky
+  }
+
+  const portal = document.querySelector<HTMLElement>("[data-toast-portal]");
+
+  /** SVG-иконки. Success = чек в брэнд-круге, error = крестик в красном. */
+  const icons: Record<ToastType, string> = {
+    success: `
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand text-white">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3.5 8.5l3 3 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>`,
+    error: `
+      <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#ff5752] text-white">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </span>`,
+  };
+
+  const escapeHtml = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+  const showToast = (opts: ToastOptions) => {
+    if (!portal) return;
+    const { type, title, description, duration = 4500 } = opts;
+
+    const el = document.createElement("div");
+    el.setAttribute("role", type === "error" ? "alert" : "status");
+    el.setAttribute("aria-live", type === "error" ? "assertive" : "polite");
+    el.className =
+      "toast pointer-events-auto flex items-start gap-3 rounded-xl border-2 border-strong bg-glass-deep p-4 backdrop-blur-[12px] shadow-[0_8px_24px_rgba(0,0,0,0.4)]";
+
+    el.innerHTML = `
+      ${icons[type]}
+      <div class="flex flex-col gap-1 min-w-0 flex-1">
+        <p class="text-body font-medium text-text-primary">${escapeHtml(title)}</p>
+        ${description ? `<p class="text-t12 text-text-muted">${escapeHtml(description)}</p>` : ""}
+      </div>
+    `;
+
+    portal.appendChild(el);
+
+    /** Двухфазный enter: класс добавляется в следующий tick, чтобы CSS
+     *  поймал переход из initial-state (translate-y-2 opacity-0) в
+     *  visible (translate-y-0 opacity-100). Без rAF браузер batched бы
+     *  оба состояния и анимация не запустилась бы. */
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => el.classList.add("toast--visible"));
+    });
+
+    const dismiss = () => {
+      el.classList.remove("toast--visible");
+      el.classList.add("toast--exiting");
+      // По окончании transitionend — удалить из DOM
+      el.addEventListener("transitionend", () => el.remove(), { once: true });
+    };
+
+    if (duration > 0) {
+      window.setTimeout(dismiss, duration);
+    }
+
+    return { dismiss };
+  };
+
+  // Глобальный API — доступен в любом script на странице.
+  (window as unknown as { toast: typeof showToast }).toast = showToast;
+</script>
+
+<style is:global>
+  /* Initial / visible / exiting состояния. Transition — не keyframe,
+     interruptible (Эмиль рекомендует transition для UI, см. "CSS
+     transitions over keyframes for interruptible UI"). */
+  .toast {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+    transition:
+      opacity 250ms cubic-bezier(0.32, 0.72, 0, 1),
+      transform 250ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .toast--visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .toast--exiting {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+    transition:
+      opacity 200ms ease-out,
+      transform 200ms ease-out;
+  }
+</style>

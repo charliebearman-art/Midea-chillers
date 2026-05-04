@@ -1,0 +1,353 @@
+---
+/**
+ * Модалка-объект (figma 1008:9191 etc).
+ *
+ * При клике на карточку в Projects (data-project-card={index}) открывается
+ * нативный <dialog> с детальной информацией о выбранном объекте: фото,
+ * название, тип, адрес и список установленного оборудования с количеством.
+ *
+ * Реализация близка к FeatureModal: тот же backdrop blur+dim, та же
+ * close-кнопка (figma 410:898, filled X-path), та же пара mousedown/mouseup
+ * для backdrop-клика. Отличия:
+ *  - Нет карусели — один контент-блок, переключающийся через --active-index.
+ *  - Используется data-modal-card для скрытия/показа активной карточки.
+ *  - Узкий контент-контейнер (max-w-[40rem]) — модалки тут компактнее
+ *    сториз (32.5rem не подходит, нужно вместить длинный список оборудования).
+ */
+interface Equipment {
+  model: string;
+  qty: string;
+}
+
+interface Project {
+  title: string;
+  type: string;
+  address: string;
+  image: string;
+  equipment: Equipment[];
+  /** Итог по мощности — необязательная строка снизу таблицы (см. Вектор-Бэст). */
+  total?: { label: string; value: string };
+}
+
+const projects: Project[] = [
+  {
+    title: "Вектор-Бэст Корпус 14, Новосибирск",
+    type: "Фармацевтическое предприятие",
+    address: "г. Новосибирск, Советский район, ул. Арбузова, д. 1/1",
+    image: "/images/project-vector-best.jpg",
+    equipment: [
+      { model: "MGRH12A-PR3Z", qty: "1 шт." },
+      { model: "MGRH17A-PR3-P", qty: "1 шт." },
+      { model: "MGRH21A-PR3-P", qty: "2 шт." },
+      { model: "MGRH26A-PR3-P", qty: "10 шт." },
+      { model: "MGRH30A-PR3-P", qty: "1 шт." },
+      { model: "MCDH70A-PR3-P", qty: "6 шт." },
+      { model: "MCDH82A-PR3-P", qty: "11 шт." },
+      { model: "MCDH130A-PR3-P", qty: "8 шт." },
+      { model: "MCDH164A-PR3-P", qty: "6 шт." },
+    ],
+    total: { label: "ИТОГО", value: "3,7 МВт" },
+  },
+  {
+    title: "ЖК Космополит, Москва",
+    type: "Жилые комплексы",
+    address: "г. Москва, Шмитовский проезд, вл. 40",
+    image: "/images/project-cosmopolite.jpg",
+    equipment: [
+      { model: "MCDH70A-PR3-P", qty: "8 шт." },
+    ],
+  },
+  {
+    title: "Здание Тулунского городского суда Иркутской области, Тулун",
+    type: "Административное здание",
+    address: "г. Тулун, Иркутская область, Песочная улица, 2а",
+    image: "/images/project-tulun.jpg",
+    equipment: [
+      { model: "MCDH130A-PR", qty: "1 шт." },
+      { model: "MCDH164A-PR3", qty: "1 шт." },
+      { model: "MCDH82A-PR3-P", qty: "1 шт." },
+    ],
+  },
+  {
+    title: "Детская городская клиническая больница №5 им. Н.Ф. Филатова, Санкт-Петербург",
+    type: "Больницы",
+    address: "г. Санкт-Петербург, Бухарестская ул., 134",
+    image: "/images/project-filatov.jpg",
+    equipment: [
+      { model: "MCDH82A-PR3", qty: "2 шт." },
+    ],
+  },
+  {
+    title: "Гостиница Космос, Казань",
+    type: "Гостиницы",
+    address: "г. Казань, ул. Лесгафта, 7",
+    image: "/images/project-cosmos.jpg",
+    equipment: [
+      { model: "MCDH130A-PR3-P", qty: "2 шт." },
+      { model: "MCDH164A-PR3-P", qty: "1 шт." },
+    ],
+  },
+  {
+    title: "ТЗСК Тольяттинский завод стальных дисков, Тольятти",
+    type: "Производственное предприятие",
+    address: "г. Тольятти, Самарская область, улица Никонова, 60",
+    image: "/images/project-tzsk.jpg",
+    equipment: [
+      { model: "MCCH130C-SA3L", qty: "1 шт." },
+    ],
+  },
+];
+---
+
+<dialog
+  data-project-modal
+  class="project-modal m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/60 backdrop:backdrop-blur-[12px]"
+>
+  <!-- Close-кнопка (та же что в FeatureModal — figma 410:898). -->
+  <button
+    type="button"
+    data-modal-close
+    aria-label="Закрыть"
+    class="fixed right-10 top-10 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white"
+  >
+    <svg width="14" height="14" viewBox="0 0 13.5 13.5" fill="currentColor" aria-hidden="true">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M12.2197 0.21967C12.5126 -0.07321 12.9874 -0.07321 13.2803 0.21967C13.5731 0.51256 13.5731 0.98744 13.2803 1.28033L7.81066 6.75L13.2803 12.2197C13.5731 12.5126 13.5731 12.9874 13.2803 13.2803C12.9874 13.5731 12.5126 13.5731 12.2197 13.2803L6.75 7.81066L1.28033 13.2803C0.98744 13.5731 0.51256 13.5731 0.21967 13.2803C-0.07321 12.9874 -0.07321 12.5126 0.21967 12.2197L5.68934 6.75L0.21967 1.28033C-0.07321 0.98744 -0.07321 0.51256 0.21967 0.21967C0.51256 -0.07321 0.98744 -0.07321 1.28033 0.21967L6.75 5.68934L12.2197 0.21967Z"
+      />
+    </svg>
+  </button>
+
+  <!-- Prev/Next-стрелки фиксированы относительно viewport: при разной
+       высоте карточек они не «прыгают», а всегда висят посередине экрана
+       по краям (4.5rem = 72px от max-w-[40rem] = 640px wrapper'а на 1440-
+       мастере: (1440-640)/2 - 72 = 328px от края). Используем
+       calc(50% - max-w/2 - 4.5rem) — центрируется автоматически.
+       На мобиле скрыты — листаем свайпом по самой странице. -->
+  <button
+    type="button"
+    data-project-prev
+    data-modal-content
+    aria-label="Предыдущий объект"
+    disabled
+    class="fixed top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base opacity-100 transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30 lg:flex"
+    style="left: max(1rem, calc(50% - 20rem - 4.5rem))"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" class="rotate-180" aria-hidden="true">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+      />
+    </svg>
+  </button>
+  <button
+    type="button"
+    data-project-next
+    data-modal-content
+    aria-label="Следующий объект"
+    class="fixed top-1/2 z-10 hidden h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30 lg:flex"
+    style="right: max(1rem, calc(50% - 20rem - 4.5rem))"
+  >
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+      />
+    </svg>
+  </button>
+
+  <!-- Wrapper для центрирования + клик-по-фону. -->
+  <div class="relative flex min-h-full w-full items-start justify-center px-4 py-10 lg:items-center lg:py-16">
+    <div data-modal-content class="relative w-full max-w-[40rem]">
+      {
+        projects.map((p, i) => (
+          <article
+            data-project-modal-card
+            data-card-index={i}
+            data-active={i === 0 ? "true" : "false"}
+            class="relative flex flex-col gap-6 rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-6 pt-2 backdrop-blur-[24px]"
+          >
+            <div class="aspect-[543/342] w-full overflow-hidden rounded-2xl bg-[#313131]">
+              <img
+                src={p.image}
+                alt={p.title}
+                loading="lazy"
+                decoding="async"
+                class="h-full w-full object-cover"
+              />
+            </div>
+
+            <div class="flex flex-col gap-4 px-4 text-text-primary">
+              <h3 class="text-h2 font-medium leading-[1.15]">{p.title}</h3>
+
+              <div class="flex flex-col gap-1">
+                <p class="text-body text-text-primary">Тип объекта</p>
+                <p class="text-t16 font-medium">{p.type}</p>
+              </div>
+
+              <div class="flex flex-col gap-1">
+                <p class="text-body text-text-primary">Адрес</p>
+                <p class="text-t16 font-medium">{p.address}</p>
+              </div>
+
+              <div class="flex flex-col gap-2">
+                <p class="text-body text-text-primary">Установленное оборудование</p>
+                <ul class="flex flex-col">
+                  {p.equipment.map((e) => (
+                    <li class="flex items-baseline gap-2 py-[2px] text-t16 font-medium">
+                      <span class="whitespace-nowrap">{e.model}</span>
+                      <span class="dotted-leader" aria-hidden="true" />
+                      <span class="whitespace-nowrap">{e.qty}</span>
+                    </li>
+                  ))}
+                  {p.total && (
+                    <li class="mt-1 flex items-baseline gap-2 border-t border-white/10 pt-2 text-h3 font-medium">
+                      <span class="whitespace-nowrap">{p.total.label}</span>
+                      <span class="dotted-leader" aria-hidden="true" />
+                      <span class="whitespace-nowrap">{p.total.value}</span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</dialog>
+
+<style>
+  /* Скрываем неактивные карточки. Один <dialog> на всю страницу,
+     активная карточка определяется data-active="true". */
+  [data-project-modal-card][data-active="false"] {
+    display: none;
+  }
+  /* Появление активной карточки: лёгкий слайд + fade.
+     --enter-x задаётся из JS, направление зависит от prev/next:
+     next → новая карточка въезжает справа (+16px → 0),
+     prev → слева (−16px → 0). Если @starting-style не поддержан,
+     карточка просто появляется без анимации (graceful degrade). */
+  [data-project-modal-card][data-active="true"] {
+    opacity: 1;
+    transform: translateX(0);
+    transition:
+      opacity 280ms cubic-bezier(0.32, 0.72, 0, 1),
+      transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @starting-style {
+    [data-project-modal-card][data-active="true"] {
+      opacity: 0;
+      transform: translateX(var(--enter-x, 16px));
+    }
+  }
+
+  /* Точечный leader между моделью и количеством — простая horizontal-rule
+     из dotted border. flex-grow занимает всё свободное пространство. */
+  .dotted-leader {
+    flex: 1 1 0;
+    min-width: 1rem;
+    align-self: center;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(235, 240, 244, 0.3) 33%, transparent 0%);
+    background-size: 6px 1px;
+    background-repeat: repeat-x;
+  }
+
+  /* Open-анимация native dialog — копия FeatureModal. */
+  .project-modal[open] {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity 250ms cubic-bezier(0.32, 0.72, 0, 1),
+      transform 250ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @starting-style {
+    .project-modal[open] {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  .project-modal[open]::backdrop {
+    opacity: 1;
+    transition: opacity 250ms ease-out;
+  }
+  @starting-style {
+    .project-modal[open]::backdrop {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>("[data-project-modal]");
+  const cards = dialog?.querySelectorAll<HTMLElement>("[data-project-modal-card]");
+  const closeBtn = dialog?.querySelector<HTMLButtonElement>("[data-modal-close]");
+  const prevBtn = dialog?.querySelector<HTMLButtonElement>("[data-project-prev]");
+  const nextBtn = dialog?.querySelector<HTMLButtonElement>("[data-project-next]");
+
+  if (dialog && cards && closeBtn && prevBtn && nextBtn) {
+    let active = 0;
+
+    const setActive = (idx: number) => {
+      const next = Math.max(0, Math.min(cards.length - 1, idx));
+      // Направление переключения для slide-анимации: вперёд → новая
+      // карточка появляется справа (+), назад — слева (−). При первом
+      // открытии (active не менялся) тоже считаем как «вперёд».
+      const dir = next >= active ? 1 : -1;
+      active = next;
+      cards.forEach((c, i) => {
+        c.style.setProperty("--enter-x", `${dir * 16}px`);
+        c.dataset.active = i === active ? "true" : "false";
+      });
+      prevBtn.disabled = active === 0;
+      nextBtn.disabled = active === cards.length - 1;
+      // Сброс scroll к началу контента — иначе после длинной модалки
+      // следующая открытая будет проскроллена.
+      dialog.scrollTo?.({ top: 0, behavior: "instant" });
+    };
+
+    prevBtn.addEventListener("click", () => setActive(active - 1));
+    nextBtn.addEventListener("click", () => setActive(active + 1));
+    /** Клавиатурная навигация: ←/→ переключает между объектами, Esc
+     *  закрывает (нативно через <dialog>). */
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" && active > 0) setActive(active - 1);
+      else if (e.key === "ArrowRight" && active < cards.length - 1) setActive(active + 1);
+    });
+
+    closeBtn.addEventListener("click", () => dialog.close());
+
+    /** Backdrop-click (mousedown→mouseup та же логика, что и в FeatureModal). */
+    let mouseDownOnBackdrop = false;
+    dialog.addEventListener("mousedown", (e) => {
+      const t = e.target as HTMLElement;
+      mouseDownOnBackdrop = !t.closest("[data-modal-content]") && !t.closest("[data-modal-close]");
+    });
+    dialog.addEventListener("mouseup", (e) => {
+      const t = e.target as HTMLElement;
+      const inContent = t.closest("[data-modal-content]");
+      const inClose = t.closest("[data-modal-close]");
+      if (mouseDownOnBackdrop && !inContent && !inClose) dialog.close();
+      mouseDownOnBackdrop = false;
+    });
+
+    /** Открытие из карточек Projects (data-project-card={index}). */
+    document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        const raw = card.dataset.projectCard;
+        if (raw === undefined) return;
+        const idx = Number(raw);
+        if (Number.isNaN(idx)) return;
+        // Не открываем модалку если идёт drag-pointer трека (см. Projects.astro).
+        if (card.closest("[data-projects-track].is-dragging")) return;
+        e.preventDefault();
+        setActive(idx);
+        dialog.showModal();
+      });
+    });
+  }
+</script>

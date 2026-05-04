@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://figma-alpha-api.s3.us-west-2.amazonaws.com/images/22713180-80d5-446e-9337-cdb760f27d06\" -o /tmp/logo-midea99.svg)",
+      "Read(//tmp/**)",
+      "Bash(python3)"
+    ]
+  }
+}

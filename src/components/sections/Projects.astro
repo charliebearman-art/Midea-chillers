@@ -1,0 +1,311 @@
+---
+/**
+ * Блок "Объекты с чиллерами Midea" (Figma node 894:4661, Related Projects).
+ * Заголовок (text-h1 — "Объекты" в gradient-text) слева, prev/next IconButton
+ * справа. Под заголовком — горизонтальный slider карточек проектов с
+ * scroll-snap. Кнопки навигации управляют скроллом контейнера на ширину
+ * одной карточки + gap.
+ *
+ * Карточка проекта: 415×auto, aspect-[543/342] image сверху, ниже категория
+ * (text-body) + название (text-h4). Bg `rgba(0,0,0,0.4)` + border-2 strong,
+ * rounded-3xl, p `pt-2 pb-6 px-2`.
+ *
+ * Сидит сразу после <Order>, делит общий `bg-ink-base` (визуально продолжая
+ * закруглённый контейнер сверху из Order).
+ */
+
+import ProjectModal from "../ProjectModal.astro";
+
+interface Project {
+  category: string;
+  title: string;
+  image: string;
+  imageAlt?: string;
+}
+
+// Порядок и тексты должны совпадать с массивом projects в ProjectModal.astro
+// (data-project-card={index} → setActive(index) в ProjectModal-скрипте).
+const projects: Project[] = [
+  {
+    category: "Фармацевтическое предприятие",
+    title: "Вектор-Бэст Корпус 14, Новосибирск",
+    image: "/images/project-vector-best.jpg",
+  },
+  {
+    category: "Жилые комплексы",
+    title: "ЖК Космополит, Москва",
+    image: "/images/project-cosmopolite.jpg",
+  },
+  {
+    category: "Административное здание",
+    title: "Здание Тулунского городского суда Иркутской области, Тулун",
+    image: "/images/project-tulun.jpg",
+  },
+  {
+    category: "Больницы",
+    title: "Детская городская клиническая больница №5 им. Н.Ф. Филатова, Санкт-Петербург",
+    image: "/images/project-filatov.jpg",
+  },
+  {
+    category: "Гостиницы",
+    title: "Гостиница Космос, Казань",
+    image: "/images/project-cosmos.jpg",
+  },
+  {
+    category: "Производственное предприятие",
+    title: "ТЗСК Тольяттинский завод стальных дисков, Тольятти",
+    image: "/images/project-tzsk.jpg",
+  },
+];
+---
+
+<!-- Sticky-секция: при скролле прилипает к нижнему краю шапки (top = header
+     height: 64px на мобиле, 80px на десктопе). z-10 ниже BusinessSolutions
+     (z-30) — следующая секция «наезжает» сверху как curtain, аналогично
+     паттерну Products над Details (см. .products-curtain в global.css). -->
+<section
+  class="sticky top-16 overflow-hidden bg-ink-base py-20 lg:top-20"
+>
+  <div class="container-x flex flex-col gap-12">
+    <!-- Заголовок + кнопки навигации -->
+    <div class="flex flex-col items-start justify-between gap-6 lg:flex-row lg:items-center">
+      <h2 data-reveal class="max-w-[37.5rem] text-h1 font-medium text-text-primary">
+        <span class="gradient-text">Объекты</span><br />
+        c&nbsp;чиллерами Midea
+      </h2>
+
+      <div data-projects-nav class="flex items-center gap-4">
+        <button
+          type="button"
+          data-projects-prev
+          disabled
+          aria-label="Предыдущие проекты"
+          style="opacity: 0.3; pointer-events: none; cursor: not-allowed;"
+          class="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors duration-200 hover:bg-brand hover:text-white"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            class="rotate-180"
+            aria-hidden="true"
+          >
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+            />
+          </svg>
+        </button>
+        <button
+          type="button"
+          data-projects-next
+          aria-label="Следующие проекты"
+          style="cursor: pointer;"
+          class="group flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors duration-200 hover:bg-brand hover:text-white"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+            />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Слайдер карточек: native horizontal scroll, mouse drag.
+         snap-* НЕ используем — браузерный snap интерферирует с
+         pointermove (дёргает scrollLeft) и со smooth scrollTo (резкий
+         "доводчик" к снап-точке). Snap к ближайшей карточке делаем
+         программно в JS на drag-end и при кликах по стрелкам. -->
+    <div
+      data-projects-track
+      class="-mx-2 flex cursor-grab select-none gap-6 overflow-x-auto scroll-smooth px-2 pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+    >
+      {
+        projects.map((project, i) => (
+          <button
+            type="button"
+            data-project-card={i}
+            class="group flex w-[25.9375rem] shrink-0 cursor-grab flex-col gap-6 rounded-3xl border-2 border-strong bg-black/40 px-2 pb-6 pt-2 text-left transition-colors duration-300 hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            <div class="relative aspect-[543/342] w-full overflow-hidden rounded-2xl">
+              <img
+                src={project.image}
+                alt={project.imageAlt ?? project.title}
+                loading="lazy"
+                decoding="async"
+                class="absolute inset-0 h-full w-full object-cover"
+              />
+            </div>
+            <div class="flex flex-col gap-1 px-4">
+              <p class="text-body text-text-primary">{project.category}</p>
+              <p class="text-h4 font-medium text-text-primary">{project.title}</p>
+            </div>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Модалка с детальной инфой о проекте. Рендерится один раз; JS внутри
+     ловит клики по [data-project-card] и переключает активный экран. -->
+<ProjectModal />
+
+<script>
+  const track = document.querySelector<HTMLElement>("[data-projects-track]");
+  const prev = document.querySelector<HTMLButtonElement>("[data-projects-prev]");
+  const next = document.querySelector<HTMLButtonElement>("[data-projects-next]");
+
+  if (track && prev && next) {
+    /** Шаг скролла = ширина одной карточки + gap (24px). Берём ширину
+     *  первой карточки, чтобы адаптироваться к ресайзу/изменению размеров. */
+    const stepPx = () => {
+      const card = track.querySelector<HTMLElement>(":scope > [data-project-card]");
+      const gap = 24;
+      return (card?.offsetWidth ?? 0) + gap;
+    };
+
+    /** Snap-точка карточки idx находится на `idx * step`. На первый взгляд
+     *  кажется, что нужно прибавлять `firstCard.offsetLeft` (=8 из-за `px-2`
+     *  padding трека), но трек обёрнут в `-mx-2` — отрицательный margin
+     *  визуально гасит этот padding. Поэтому `scrollLeft = 0` — это позиция,
+     *  где первая карточка флашится с левой границей container-x. Прибавление
+     *  offsetLeft давало бы 8px съезд влево («вылезание за сетку»). */
+    const cardCount = () => track.querySelectorAll(":scope > [data-project-card]").length;
+
+    const currentIndex = () => {
+      const step = stepPx();
+      if (step <= 0) return 0;
+      return Math.round(track.scrollLeft / step);
+    };
+
+    const goToIndex = (idx: number) => {
+      const clamped = Math.max(0, Math.min(cardCount() - 1, idx));
+      track.scrollTo({ left: clamped * stepPx(), behavior: "smooth" });
+    };
+
+    /** Используем inline style вместо Tailwind utility-классов: inline-стили
+     *  имеют максимальную специфичность и гарантированно перебивают любые
+     *  cascade-конфликты (`[data-reveal]` и т.п.). */
+    const setDisabled = (btn: HTMLButtonElement, isDisabled: boolean) => {
+      btn.disabled = isDisabled;
+      btn.style.opacity = isDisabled ? "0.3" : "";
+      btn.style.pointerEvents = isDisabled ? "none" : "";
+      btn.style.cursor = isDisabled ? "not-allowed" : "pointer";
+    };
+
+    /** Толерантный threshold (30px) учитывает snap-mandatory: первая карточка
+     *  снапится в точку scrollLeft ≈ padding-x (8px), а не 0 — иначе считаем,
+     *  что мы «на первой карточке», даже если scrollLeft слегка > 0. */
+    const updateButtons = () => {
+      const atStart = track.scrollLeft <= 30;
+      const atEnd = track.scrollLeft + track.clientWidth >= track.scrollWidth - 30;
+      setDisabled(prev, atStart);
+      setDisabled(next, atEnd);
+    };
+
+    prev.addEventListener("click", () => goToIndex(currentIndex() - 1));
+    next.addEventListener("click", () => goToIndex(currentIndex() + 1));
+
+    track.addEventListener("scroll", updateButtons, { passive: true });
+    window.addEventListener("resize", updateButtons, { passive: true });
+
+    /** Drag-to-scroll: только для mouse-pointer'а. У touch — нативный
+     *  horizontal scroll работает «из коробки» через overflow-x-auto и не
+     *  требует JS-перехвата (иначе ломается inertia/momentum).
+     *
+     *  ВАЖНО: НЕ используем `setPointerCapture` — он перенаправляет click-
+     *  события с дочерних элементов (карточек) на сам трек, и обработчики
+     *  click на `[data-project-card]` (модалка-объект) перестают срабатывать.
+     *  Вместо capture слушаем pointermove/up на `document`: drag продолжает
+     *  работать даже если курсор уехал за пределы трека, а click нативно
+     *  доходит до целевой кнопки. */
+    let drag: { startX: number; startScroll: number; pointerId: number; moved: boolean } | null = null;
+    let onMove: ((e: PointerEvent) => void) | null = null;
+    let onUp: ((e: PointerEvent) => void) | null = null;
+    const DRAG_THRESHOLD = 4; // px — после такого сдвига считаем это drag'ом, не кликом
+
+    track.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "mouse") return;
+      drag = { startX: e.clientX, startScroll: track.scrollLeft, pointerId: e.pointerId, moved: false };
+      track.style.scrollBehavior = "auto";
+
+      onMove = (e2) => {
+        if (!drag || e2.pointerId !== drag.pointerId) return;
+        const dx = e2.clientX - drag.startX;
+        if (Math.abs(dx) > DRAG_THRESHOLD && !drag.moved) {
+          drag.moved = true;
+          track.classList.add("is-dragging");
+        }
+        if (drag.moved) {
+          track.scrollLeft = drag.startScroll - dx;
+        }
+      };
+      onUp = (e2) => {
+        if (!drag || e2.pointerId !== drag.pointerId) return;
+        if (onMove) document.removeEventListener("pointermove", onMove);
+        if (onUp) {
+          document.removeEventListener("pointerup", onUp);
+          document.removeEventListener("pointercancel", onUp);
+        }
+        const wasDrag = drag.moved;
+        drag = null;
+        track.classList.remove("is-dragging");
+        track.style.scrollBehavior = "";
+        if (wasDrag) {
+          // После реального drag — снапим к ближайшей карточке.
+          goToIndex(currentIndex());
+          // И гасим click, который браузер пошлёт по pointerup, чтобы он
+          // не открыл модалку «случайно» на конце драга.
+          const swallow = (ev: Event) => {
+            ev.stopPropagation();
+            ev.preventDefault();
+          };
+          track.addEventListener("click", swallow, { capture: true, once: true });
+          // Если клик так и не пришёл — снимаем listener следующим кадром.
+          requestAnimationFrame(() => track.removeEventListener("click", swallow, { capture: true } as any));
+        }
+      };
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onUp);
+    });
+    /** Во время drag блокируем нативный image-drag (призрак картинки). */
+    track.addEventListener("dragstart", (e) => e.preventDefault());
+
+    /** Сбрасываем scroll-позицию мгновенно (без `scroll-smooth`-анимации,
+     *  иначе браузер плавно доезжает до снап-точки и `updateButtons` ловит
+     *  промежуточные значения scrollLeft, снимая disabled). */
+    track.scrollTo({ left: 0, behavior: "instant" });
+    updateButtons();
+  }
+</script>
+
+<style>
+  /** Cursor-наследование: cursor по умолчанию НЕ inherit'ится (у `<p>`
+   *  text-cursor, у `<img>` default). Принудительно говорим всем
+   *  потомкам трека наследовать cursor с родителя — карточки получают
+   *  grab от себя, картинка/текст — grab от карточки. */
+  [data-projects-track] *,
+  [data-projects-track] *::before,
+  [data-projects-track] *::after {
+    cursor: inherit;
+  }
+
+  /** Drag-state: меняем cursor на grabbing для трека и всех потомков.
+   *  pointer-events: none на дочерних элементах гасит hover-стейт + клики
+   *  по карточкам, пока пользователь тянет — pointer capture на треке
+   *  всё равно ловит pointermove/up. */
+  [data-projects-track].is-dragging,
+  [data-projects-track].is-dragging * {
+    cursor: grabbing !important;
+  }
+  [data-projects-track].is-dragging > * {
+    pointer-events: none;
+  }
+</style>

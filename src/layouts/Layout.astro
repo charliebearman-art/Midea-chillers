@@ -1,0 +1,53 @@
+---
+import "../styles/global.css";
+import Toast from "../components/Toast.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Модульные чиллеры Midea со встроенным гидромодулем — Daichi",
+  description = "Уникальное техническое решение для рынка РФ. Чиллеры Midea с гидромодулем — всегда в наличии, технология Plug&Play, на 30% ниже расход электроэнергии.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a0d12" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Manrope как fallback для Gotham Pro -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap"
+    />
+
+    <!-- preload критических шрифтов -->
+<link rel="preload" href="/fonts/GothamPro-Bold.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/GothamPro-Medium.woff2" as="font" type="font/woff2" crossorigin />
+
+    <!-- preload hero-картинки для LCP -->
+    <link rel="preload" as="image" href="/images/hero-city.jpg" />
+
+    <title>{title}</title>
+
+    <!-- OG -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/images/og.jpg" />
+  </head>
+  <body>
+    <Toast />
+    <slot />
+  </body>
+</html>

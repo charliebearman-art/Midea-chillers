@@ -1,0 +1,305 @@
+---
+import Button from "./Button.astro";
+
+const navLinks = [
+  { label: "Преимущества", href: "#advantages" },
+  { label: "Модельный ряд", href: "#products" },
+  { label: "О «Даичи»", href: "#order" },
+  { label: "Объекты", href: "#projects" },
+  { label: "Вопрос & Ответ", href: "#faq" },
+];
+---
+
+<header
+  data-mobile-menu
+  class="fixed left-0 top-0 z-50 w-screen max-w-[100vw] [overflow-x:clip] bg-black/[0.01] backdrop-blur-[8px] lg:h-20 lg:backdrop-blur-[16px]"
+>
+  <!-- ========= Desktop ========= -->
+  <div class="container-x hidden h-20 items-center justify-between gap-8 lg:flex">
+    <a href="/" class="flex items-center" aria-label="midea99">
+      <img
+        src="/images/logo-midea99.svg"
+        alt="midea99"
+        width="134"
+        height="48"
+        class="h-12 w-auto"
+      />
+    </a>
+
+    <nav class="flex items-center gap-8" aria-label="Главная навигация">
+      {
+        navLinks.map((link) => (
+          <a
+            href={link.href}
+            class="text-body text-text-primary transition-colors hover:text-brand-light"
+          >
+            {link.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <!-- Стрелка-индикатор: до контакт-блока смотрит вниз (контакт ниже),
+         после прокрутки за блок — вверх. См. data-arrow-dir + IO ниже. -->
+    <Button
+      href="#contact"
+      size="md"
+      data-header-cta
+      data-arrow-dir="down"
+    >
+      Оставить заявку
+    </Button>
+  </div>
+
+  <!-- ========= Mobile (figma 1089:10301) =========
+       Размеры в rem от 360-мобильного-мастера (1rem = 16px на 360).
+       Через html font-size: clamp(16px, 4.444vw, 28.4px) меню
+       fluid-скейлится вместе со всей мобильной вёрсткой:
+         360 → 1rem = 16px (мастер)
+         414 → 1rem = 18.4px (×1.15)
+         639 → 1rem = 28.4px (×1.78). -->
+  <div data-mobile-shell class="lg:hidden">
+    <div data-mobile-row>
+      <a href="/" aria-label="midea99" class="shrink-0">
+        <img
+          src="/images/logo-midea99.svg"
+          alt="midea99"
+          width="78"
+          height="28"
+          data-mobile-logo
+        />
+      </a>
+
+      <div data-mobile-actions>
+        <button
+          type="button"
+          data-mobile-menu-toggle
+          aria-label="Меню"
+          aria-expanded="false"
+          aria-controls="mobile-menu-panel"
+        >
+          <!-- Chevron-down. Глиф растянут на 81.8%×45.6% бокса 16×16
+               (figma inset 27.21%/9.1%) → ~13×7px видимой стрелки. -->
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path
+              d="M1.5 4.75 L8 11.25 L14.5 4.75"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
+
+        <a href="#contact" data-mobile-cta>Оставить заявку</a>
+      </div>
+    </div>
+
+    <div id="mobile-menu-panel" data-mobile-menu-panel>
+      <nav aria-label="Мобильная навигация">
+        <ul>
+          {
+            navLinks.map((link) => (
+              <li>
+                <a
+                  href={link.href}
+                  data-mobile-nav-link
+                  data-target={link.href.slice(1)}
+                >
+                  <span>{link.label}</span>
+                  <span data-mobile-nav-dot aria-hidden="true" />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<style is:global>
+  /* Шапочный CTA: стрелка SVG внутри `[data-header-cta]` поворачивается
+     на 90° (вниз) или −90° (вверх) в зависимости от data-arrow-dir.
+     `is:global` нужен, потому что SVG рендерится Button-компонентом
+     с другим astro-cid, и scoped-селекторы из Header.astro его не достают. */
+  [data-header-cta] svg {
+    transition: transform 350ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  [data-header-cta][data-arrow-dir="down"] svg {
+    transform: rotate(90deg);
+  }
+  [data-header-cta][data-arrow-dir="up"] svg {
+    transform: rotate(-90deg);
+  }
+
+  /* ========= Мобильное меню — rem от 360-master =========
+     Все значения = (px на 360-master) / 16 rem. Скейлятся через
+     html font-size clamp вместе с остальной мобильной вёрсткой. */
+  [data-mobile-shell] {
+    padding: 0.5rem 1rem; /* 8 / 16 */
+  }
+  [data-mobile-row] {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem; /* 8 */
+  }
+  [data-mobile-logo] {
+    height: 1.75rem; /* 28 */
+    width: auto;
+    display: block;
+  }
+  [data-mobile-actions] {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* 16 — figma gap-[16px] */
+    flex-shrink: 0;
+  }
+  [data-mobile-menu-toggle] {
+    width: 2.25rem; /* 36 = 16 icon + 10 padding × 2 */
+    height: 2.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-primary);
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+  [data-mobile-menu-toggle] svg {
+    width: 1rem; /* 16 — иконка скейлится вместе с rem */
+    height: 1rem;
+    transition: transform 300ms ease-out;
+  }
+  header[data-mobile-menu-open] [data-mobile-menu-toggle] svg {
+    transform: rotate(180deg);
+  }
+  [data-mobile-cta] {
+    display: inline-flex;
+    align-items: center;
+    background: var(--brand);
+    color: #fff;
+    border-radius: 6.25rem; /* 100 — figma rounded-[100px] */
+    padding: 0.125rem 0.5rem; /* 2 / 8 */
+    font-size: 0.75rem; /* 12 */
+    line-height: 1.6;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  /* Раскрывающаяся панель: grid-rows 0fr → 1fr.
+     padding-top на внутреннем <nav> = 0.5rem (figma gap-[8px]
+     между header-row и nav-списком). При свёрнутом меню grid
+     высоты 0, поэтому padding не виден. */
+  [data-mobile-menu-panel] {
+    display: grid;
+    grid-template-rows: 0fr;
+    overflow: hidden;
+    transition: grid-template-rows 300ms ease-out;
+  }
+  [data-mobile-menu-panel] > nav {
+    min-height: 0;
+    padding-top: 0.5rem; /* 8 */
+  }
+  header[data-mobile-menu-open] [data-mobile-menu-panel] {
+    grid-template-rows: 1fr;
+  }
+  [data-mobile-menu-panel] ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  [data-mobile-nav-link] {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* 16 */
+    padding: 0.75rem 0; /* 12 */
+    font-size: 0.875rem; /* 14 */
+    line-height: 1.6;
+    color: var(--text-primary);
+  }
+  [data-mobile-nav-link] > span:first-child {
+    flex: 1 0 0;
+  }
+  [data-mobile-nav-dot] {
+    display: block;
+    width: 0.5rem; /* 8 */
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--brand);
+    opacity: 0;
+    flex-shrink: 0;
+    transition: opacity 200ms ease-out;
+  }
+  [data-mobile-nav-link][data-active] [data-mobile-nav-dot] {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  /** Когда нижний край #contact выходит за viewport (мы прокрутили дальше
+   *  блока заявки) — стрелка десктопного CTA поворачивается вверх. */
+  const cta = document.querySelector<HTMLElement>("[data-header-cta]");
+  const contact = document.querySelector<HTMLElement>("#contact");
+
+  if (cta && contact) {
+    const update = () => {
+      const rect = contact.getBoundingClientRect();
+      cta.dataset.arrowDir = rect.bottom < 80 ? "up" : "down";
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update, { passive: true });
+  }
+
+  /** Раскрытие/сворачивание мобильного меню по тапу на chevron. */
+  const header = document.querySelector<HTMLElement>("header[data-mobile-menu]");
+  const toggle = document.querySelector<HTMLButtonElement>("[data-mobile-menu-toggle]");
+
+  if (header && toggle) {
+    const setOpen = (open: boolean) => {
+      if (open) header.setAttribute("data-mobile-menu-open", "");
+      else header.removeAttribute("data-mobile-menu-open");
+      toggle.setAttribute("aria-expanded", String(open));
+    };
+
+    toggle.addEventListener("click", () => {
+      setOpen(!header.hasAttribute("data-mobile-menu-open"));
+    });
+
+    // Тап по пункту меню — закрываем сразу, чтобы пользователь видел
+    // секцию, к которой произошёл скролл, без второго жеста.
+    header.querySelectorAll<HTMLAnchorElement>("[data-mobile-nav-link]").forEach((a) => {
+      a.addEventListener("click", () => setOpen(false));
+    });
+  }
+
+  /** Scroll-spy: определяет, какая секция сейчас «под шапкой» и подсвечивает
+   *  соответствующий пункт мобильного меню синей точкой. Активной считаем
+   *  последнюю секцию, чей top пересёк линию offset (≈ высота шапки).
+   *  До первой секции — точка не показывается (activeIdx = -1). */
+  const navLinks = Array.from(
+    document.querySelectorAll<HTMLAnchorElement>("[data-mobile-nav-link]")
+  );
+  const targets = navLinks
+    .map((a) => ({ link: a, el: document.getElementById(a.dataset.target!) }))
+    .filter((t): t is { link: HTMLAnchorElement; el: HTMLElement } => !!t.el);
+
+  if (targets.length) {
+    const updateActive = () => {
+      const offset = 80;
+      let activeIdx = -1;
+      for (let i = 0; i < targets.length; i++) {
+        if (targets[i].el.getBoundingClientRect().top - offset <= 0) activeIdx = i;
+      }
+      navLinks.forEach((l, i) => {
+        if (i === activeIdx) l.setAttribute("data-active", "");
+        else l.removeAttribute("data-active");
+      });
+    };
+    updateActive();
+    window.addEventListener("scroll", updateActive, { passive: true });
+    window.addEventListener("resize", updateActive, { passive: true });
+  }
+</script>

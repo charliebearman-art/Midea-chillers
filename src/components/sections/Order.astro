@@ -1,0 +1,262 @@
+---
+import Button from "../Button.astro";
+import VideoModal from "../VideoModal.astro";
+/**
+ * Блок "Заказывайте чиллеры Midea в компании «Даичи»".
+ * Заголовок (text-h1, "Заказывайте" — в брэнд-градиенте) + сетка УТП-карточек
+ * 4-кол × 2-ряда (Figma node 748:3134):
+ *
+ * Ряд 1: [№1 в мире] [Видео-карточка span 2] [Эксклюзивная складская программа]
+ * Ряд 2: [Фото-карточка] [Серийное производство] [Только в «Даичи»] [CTA — Оставить заявку]
+ *
+ * Все УТП-карточки — `bg-[#1d2025]` (background/surface-2 из Figma), p-6, rounded-3xl, h-80,
+ * с заголовком (text-h2 — первое слово в gradient-text) сверху и описанием
+ * (text-body) внизу через flex justify-between.
+ *
+ * Видео-карточка: bg-фон с Землёй (image-fill в Figma — отдельный asset
+ * `usp-earth.jpg`) + pill-кнопка "Смотреть видео" в правом нижнем углу.
+ * Фото-карточка: просто `<img>` с rounded-3xl + cover.
+ * CTA: bg-brand, "Оставить заявку" (text-h2 white) сверху, белый круг с
+ * arrow-next справа внизу. Ссылка на #contact.
+ */
+---
+
+<section
+  id="order"
+  data-order-section
+  class="relative z-10 -mt-[60px] rounded-t-3xl bg-ink-base"
+  style="transform: translateY(60px)"
+>
+  <!-- Размытый эллипс-glow (Figma 894:4635). Order имеет z-10, поэтому
+       нижняя часть эллипса, выходящая за нижнюю границу Order, остаётся
+       видимой над Projects (его bg-ink-base не перекрывает). Один большой
+       эллипс вместо пары — гарантирует непрерывное свечение без видимой
+       границы на стыке секций (Projects-овский clip раньше создавал шов). -->
+  <div
+    aria-hidden="true"
+    class="pointer-events-none absolute -bottom-[60%] -right-[10%] size-[88rem] max-w-[120vw] rounded-full bg-[radial-gradient(circle,rgba(50,163,253,0.7)_0%,rgba(50,163,253,0.3)_35%,transparent_70%)] blur-[120px]"
+  >
+  </div>
+
+  <div class="container-x py-20">
+    <h2 data-reveal class="text-center text-h1 font-medium text-text-primary">
+      <span class="gradient-text">Заказывайте</span><br />
+      чиллеры Midea в&nbsp;компании «Даичи»
+    </h2>
+
+    <div class="mt-12 flex flex-col gap-6">
+    <!-- Ряд 1: УТП | Видео | УТП -->
+    <div class="grid grid-cols-1 gap-6 lg:h-80 lg:grid-cols-4">
+      <!-- № 1 в мире -->
+      <article
+        data-reveal
+        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+      >
+        <h3 class="text-h2 font-medium text-text-primary">
+          <span class="gradient-text">№&nbsp;1 в&nbsp;мире</span><br />
+          по&nbsp;продажам чиллеров
+        </h3>
+        <p class="text-body text-text-primary">
+          Компания «Даичи» — лидер рынка по&nbsp;итогам 2024 года
+        </p>
+      </article>
+
+      <!-- Видео-карточка (span 2) — фон-видео numberonesmall.mp4 + CTA
+           «Смотреть видео» в правом нижнем углу. -->
+      <article
+        data-reveal
+        data-reveal-delay="80"
+        class="relative h-80 overflow-hidden rounded-3xl bg-[#1d2025] lg:col-span-2 lg:h-auto"
+      >
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        >
+          <source src="/videos/numberonesmall.mp4" type="video/mp4" />
+        </video>
+        <Button size="md" class="absolute bottom-6 right-6" data-video-trigger>
+          Смотреть видео
+          <svg
+            slot="icon"
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path d="M5 3v10l8-5z" />
+          </svg>
+        </Button>
+      </article>
+
+      <!-- Эксклюзивная складская программа -->
+      <article
+        data-reveal
+        data-reveal-delay="160"
+        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+      >
+        <h3 class="text-h2 font-medium text-text-primary">
+          <span class="gradient-text">Эксклюзивная</span><br />
+          складская программа
+        </h3>
+        <p class="text-body text-text-primary">
+          Мы&nbsp;— первый дистрибьютор в&nbsp;России со&nbsp;складом модульных чиллеров
+          со&nbsp;встроенным гидромодулем
+        </p>
+      </article>
+    </div>
+
+    <!-- Ряд 2: Фото | УТП | УТП | CTA -->
+    <div class="grid grid-cols-1 gap-6 lg:h-80 lg:grid-cols-4">
+      <!-- Фото-карточка (небоскрёб) -->
+      <article
+        data-reveal
+        class="relative h-80 overflow-hidden rounded-3xl lg:h-auto"
+      >
+        <img
+          src="/images/usp-skyscraper.jpg"
+          alt="Офис «Даичи»"
+          loading="lazy"
+          decoding="async"
+          class="pointer-events-none absolute inset-0 h-full w-full object-cover"
+        />
+      </article>
+
+      <!-- Серийное производство -->
+      <article
+        data-reveal
+        data-reveal-delay="80"
+        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+      >
+        <h3 class="text-h2 font-medium text-text-primary">
+          <span class="gradient-text">Серийное</span> производство
+        </h3>
+        <p class="text-body text-text-primary">
+          Midea — первый китайский производитель, запустивший серийный выпуск модульных
+          чиллеров со&nbsp;встроенным гидромодулем
+        </p>
+      </article>
+
+      <!-- Только в «Даичи» -->
+      <article
+        data-reveal
+        data-reveal-delay="160"
+        class="flex h-80 flex-col items-start justify-between rounded-3xl bg-[#1d2025] p-6 lg:h-auto"
+      >
+        <h3 class="text-h2 font-medium text-text-primary">
+          <span class="gradient-text">Только</span><br />
+          в&nbsp;«Даичи»
+        </h3>
+        <p class="text-body text-text-primary">
+          Чиллеры AQUA THERMAL GM&nbsp;—<br />
+          эксклюзивно на&nbsp;складе в&nbsp;«Даичи»
+        </p>
+      </article>
+
+      <!-- CTA: Оставить заявку (Figma node 398:991, hover variant 398:992).
+           Hover = ПОЛНАЯ инверсия: bg → светлый, текст → тёмный, круг → brand,
+           стрелка → светлая.
+
+           Bg меняется через opacity-overlay (а не `transition-colors`):
+           CSS цветовая интерполяция brand → near-white проходит через тусклый
+           промежуточный grey — на большой площади выглядит грязно. Opacity-
+           crossfade 300ms даёт плавный «фотомонтажный» переход.
+           Текст и иконка — мелкие по площади, для них transition-colors
+           300ms ease-out читается чисто. -->
+      <a
+        href="#contact"
+        data-reveal
+        data-reveal-delay="240"
+        class="group relative flex h-80 flex-col items-end justify-between overflow-hidden rounded-3xl bg-brand p-6 lg:h-auto"
+      >
+        <!-- Hover-bg overlay поверх bg-brand: прозрачный по умолчанию,
+             fade-in 300ms на ховере. -->
+        <span
+          aria-hidden="true"
+          class="pointer-events-none absolute inset-0 bg-[#EFF2F5] opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
+        >
+        </span>
+
+        <p
+          class="relative w-full text-h2 font-medium text-white transition-colors duration-300 ease-out group-hover:text-text-inverse"
+        >
+          Оставить заявку
+        </p>
+        <span
+          class="relative flex h-12 w-12 items-center justify-center rounded-full bg-white text-brand transition-colors duration-300 ease-out group-hover:bg-brand group-hover:text-[#EFF2F5]"
+          aria-hidden="true"
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+            <path
+              fill-rule="evenodd"
+              clip-rule="evenodd"
+              d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+            />
+          </svg>
+        </span>
+      </a>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- Модалка с видео — открывается из кнопки [data-video-trigger]. -->
+<VideoModal />
+
+<script>
+  /** Scroll-driven translate: Order «выезжает» из-под Contact.
+   *  Старт: section.transform = translateY(60px) — установлен inline
+   *  на самой секции (см. атрибут `style`), чтобы первый paint уже был
+   *  в правильной стартовой позиции, без вспышки.
+   *
+   *  Прогресс считается от позиции верхнего края Order относительно
+   *  viewport: 0 когда top на уровне нижнего края (только показалась),
+   *  1 когда top достигает 40% высоты viewport (уверенно в кадре).
+   *  Линейная интерполяция между ними даёт плавный 1-в-1 скролл-driven
+   *  motion. При prefers-reduced-motion — фиксируем translateY(0). */
+  const section = document.querySelector<HTMLElement>("[data-order-section]");
+  if (section) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) {
+      section.style.transform = "translateY(0)";
+    } else {
+      const MAX_TRANSLATE = 60;
+      let rafId: number | null = null;
+
+      const update = () => {
+        rafId = null;
+        const rect = section.getBoundingClientRect();
+        const vh = window.innerHeight;
+        const start = vh;
+        const end = vh * 0.4;
+        let progress = (start - rect.top) / (start - end);
+        progress = Math.max(0, Math.min(1, progress));
+        const translateY = MAX_TRANSLATE * (1 - progress);
+        // При translateY=0 убираем transform полностью (а не translateY(0px)):
+        // identity-transform всё равно создаёт GPU-compositor-layer, на границе
+        // которого появляется тонкий subpixel-просвет — через него виден body-bg
+        // (#0a0d12), который темнее bg-ink-base (#0f1115). Полное снятие
+        // transform возвращает Order на основной слой, и шов исчезает.
+        if (translateY === 0) {
+          section.style.transform = "";
+        } else {
+          section.style.transform = `translateY(${translateY}px)`;
+        }
+      };
+
+      const onScroll = () => {
+        if (rafId !== null) return;
+        rafId = requestAnimationFrame(update);
+      };
+
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", onScroll, { passive: true });
+      update();
+    }
+  }
+</script>

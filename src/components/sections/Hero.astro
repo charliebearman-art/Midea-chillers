@@ -1,0 +1,202 @@
+---
+import Button from "../Button.astro";
+import FeatureCard from "../FeatureCard.astro";
+import FeatureModal from "../FeatureModal.astro";
+import VideoCard from "../VideoCard.astro";
+
+const features = [
+  {
+    image: "/images/feature-warehouse.jpg",
+    label: "Всегда в наличии на складе",
+  },
+  {
+    image: "/images/feature-midea.jpg",
+    label: "Решение без аналогов в РФ",
+  },
+  {
+    image: "/images/feature-plugplay.jpg",
+    label: "Технология Plug&Play",
+  },
+  {
+    image: "/images/feature-energy.jpg",
+    label: "На 30% ниже расход электроэнергии",
+  },
+];
+---
+
+<section class="container-x">
+  <div class="flex flex-col gap-4 lg:gap-0">
+  <!-- Hero-контейнер: фон + pin-плашки -->
+  <div
+    class="relative overflow-hidden rounded-2xl lg:rounded-3xl"
+    data-hero
+  >
+    <!-- Фоновое видео (autoplay, без звука, в цикле) -->
+    <video
+      data-hero-image
+      autoplay
+      muted
+      loop
+      playsinline
+      preload="auto"
+      poster="/images/hero-city.jpg"
+      aria-hidden="true"
+      class="aspect-[1440/810] h-auto w-full object-cover"
+    >
+      <source src="/videos/hero-bg.mp4" type="video/mp4" />
+    </video>
+
+    <!-- Текстурный оверлей: тилёный dot-pattern по фигме (4px source × scale 0.2,
+         spacing 2px, opacity 0.2 — воспроизведено через CSS radial-gradient) -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0"
+      style="background-image: radial-gradient(circle, rgba(0,0,0,1) 0.4px, transparent 0.7px); background-size: 3px 3px; opacity: 0.2;"
+    >
+    </div>
+
+    <!-- Тёмный градиент снизу для читаемости плашек -->
+    <div
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
+    >
+    </div>
+
+    <!-- Pin-карточки внизу — ТОЛЬКО на десктопе: видео-карточка слева + 4 фичи справа.
+         На мобиле эти плашки внутри видео скрыты (`hidden lg:flex`),
+         их роль играет блок под видео: figma 750:3736+750:3758+750:3806.
+         Стартовый translateY смещает их под нижний край Hero (overflow-
+         hidden родителя их прячет). JS (внизу) уменьшает translateY к 0
+         по мере того как Hero входит во viewport — карточки "поднимаются
+         из-под видео" и останавливаются на текущем месте. -->
+    <div
+      data-hero-cards
+      class="absolute bottom-6 left-6 right-6 hidden flex-wrap items-end justify-between gap-4 will-change-transform lg:flex"
+      style="transform: translate3d(0, var(--cards-y, calc(100% + 1.5rem)), 0)"
+    >
+      <VideoCard label="Видео о продукте" />
+
+      <ul class="flex flex-wrap items-end justify-end gap-4">
+        {
+          features.map((feature, i) => (
+            <li>
+              <FeatureCard image={feature.image} label={feature.label} index={i} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </div>
+
+  <!-- Мобильный блок под видео — figma 750:3736 далее.
+       На десктопе скрыт: эти элементы там либо плавают над видео
+       (фичи), либо живут в Banner.astro (Daichi+CTA внутри aside). -->
+  <div class="flex flex-col gap-4 lg:hidden">
+    <div data-hero-cta>
+      <Button href="#contact" fullWidth>Оставить заявку</Button>
+    </div>
+
+    <div class="rounded-2xl border-2 border-strong bg-black/20 p-4">
+      <div class="flex flex-col items-center gap-4">
+        <img
+          src="/images/logo-daichi.svg"
+          alt="Daichi"
+          width="120"
+          height="22"
+          class="h-4 w-auto"
+        />
+        <p class="text-center text-t12 text-text-primary">
+          «Даичи» — дистрибьютор №&nbsp;1<br />
+          по&nbsp;поставкам чиллеров Midea
+        </p>
+      </div>
+    </div>
+
+    <!-- 4 фичи — горизонтальный scroll. Размер карточек на мобиле
+         7.375rem (= 118px на 360-мастере, см. figma 750:3807..3810).
+         -mx-4/px-4 выводит scroll за пределы container-padding, чтобы
+         трек шёл от левого края экрана; внутренний px-4 даёт первой
+         карточке отступ слева, последней — справа. -->
+    <ul class="-mx-4 flex gap-1 overflow-x-auto px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      {
+        features.map((feature) => (
+          <li>
+            <FeatureCard image={feature.image} label={feature.label} />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  </div>
+</section>
+
+<!-- Модалка-сториз для клика по feature-cards. Рендерится один раз
+     на странице, JS внутри ловит клики на `[data-feature-card]`. -->
+<FeatureModal />
+
+<!--
+  Лёгкий parallax на фоновую картинку при скролле — чистый CSS не сделать
+  идеально, поэтому минимальный JS с requestAnimationFrame.
+  При prefers-reduced-motion эффект отключён через CSS-правило в global.css.
+-->
+<script>
+  const heroMedia = document.querySelector<HTMLElement>("[data-hero-image]");
+  const hero = document.querySelector<HTMLElement>("[data-hero]");
+  const cards = document.querySelector<HTMLElement>("[data-hero-cards]");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // При prefers-reduced-motion ставим автоплей на паузу, иначе пусть крутится.
+  if (heroMedia instanceof HTMLVideoElement && reducedMotion) {
+    heroMedia.pause();
+  }
+
+  // Reduced-motion: карточки сразу на месте, без анимации.
+  if (cards && reducedMotion) {
+    cards.style.setProperty("--cards-y", "0px");
+  }
+
+  if (hero && !reducedMotion) {
+    let ticking = false;
+    const update = () => {
+      const rect = hero.getBoundingClientRect();
+      const vh = window.innerHeight;
+
+      // Parallax видео.
+      if (heroMedia) {
+        const progress = (rect.top + rect.height / 2 - vh / 2) / vh;
+        const translate = Math.max(-30, Math.min(30, progress * -30));
+        heroMedia.style.transform = `translate3d(0, ${translate}px, 0) scale(1.06)`;
+      }
+
+      // Подъём карточек: анимация ЗАВЕРШАЕТСЯ к моменту, когда нижний край
+      // Hero только-только появляется в viewport (rect.bottom = vh).
+      // progress 0 — Hero ещё на DISTANCE px ниже viewport-а, карточки спрятаны.
+      // progress 1 — Hero.bottom коснулся края viewport-а, карточки на месте.
+      // enter = vh - rect.bottom: 0 когда край на viewport, отрицателен пока
+      // Hero ниже. Сдвигаем диапазон на DISTANCE вперёд.
+      if (cards) {
+        const hiddenPx = cards.offsetHeight + 24;
+        const DISTANCE = Math.min(vh * 0.45, 360);
+        const enter = vh - rect.bottom;
+        const progress = Math.min(1, Math.max(0, (enter + DISTANCE) / DISTANCE));
+        const offsetPx = (1 - progress) * hiddenPx;
+        cards.style.setProperty("--cards-y", `${offsetPx}px`);
+      }
+
+      ticking = false;
+    };
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!ticking) {
+          requestAnimationFrame(update);
+          ticking = true;
+        }
+      },
+      { passive: true },
+    );
+    window.addEventListener("resize", update, { passive: true });
+    update();
+  }
+</script>

@@ -1,0 +1,47 @@
+---
+/**
+ * Финальный блок «Выбирайте надёжность с чиллерами Midea» (figma 748:3199).
+ * Заголовок (text-h1, "с чиллерами Midea" в брэнд-градиенте) +
+ * горизонтальная связка логотипов: midea99 × DAICHI.
+ * Сидит в конце страницы перед футером.
+ */
+---
+
+<section class="container-x py-16">
+  <div class="flex flex-col items-center gap-16">
+    <h2
+      data-reveal
+      class="text-center text-h1 font-medium text-text-primary"
+    >
+      Выбирайте надёжность<br />
+      <span class="gradient-text">c&nbsp;чиллерами Midea</span>
+    </h2>
+
+    <!-- Связка лого: midea99 × DAICHI. Выровнены по базовой линии букв
+         (нижний край «Midea» / «DAICHI»), а НЕ по центру / нижнему краю
+         SVG. У Midea-логотипа окружность вокруг M уходит ниже базовой
+         линии примерно на 11px при h-20 (viewBox 0 0 134 48 → буквы
+         заканчиваются на y≈41.44, bottom на y=48 → 6.56*80/48≈11px).
+         Поднимаем Daichi и × на эти 11px через mb-[11px] при items-end. -->
+    <div data-reveal data-reveal-delay="120" class="flex items-end gap-8">
+      <img
+        src="/images/logo-midea99.svg"
+        alt="midea99"
+        width="222"
+        height="80"
+        class="h-20 w-auto"
+      />
+      <span
+        aria-hidden="true"
+        class="mb-[11px] text-h2 font-medium text-text-primary"
+      >×</span>
+      <img
+        src="/images/logo-daichi.svg"
+        alt="Daichi"
+        width="222"
+        height="80"
+        class="mb-[11px] h-12 w-auto"
+      />
+    </div>
+  </div>
+</section>

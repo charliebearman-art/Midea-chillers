@@ -1,0 +1,62 @@
+---
+/**
+ * Карточка-деталь: номер слева, текст по центру, картинка справа.
+ * Используется в секции "Готовое решение от производителя чиллеров №1".
+ */
+interface Props {
+  number: string;
+  /** Первая часть заголовка с акцентом-градиентом (e.g. "На 45% дешевле,") */
+  highlight: string;
+  /** Остаток заголовка обычным цветом (e.g. "чем чиллер + отдельный гидромодуль") */
+  title: string;
+  /** Текст описания. Можно строкой или массивом (тогда выводим списком) */
+  description: string | string[];
+  image: string;
+  imageAlt?: string;
+}
+
+const { number, highlight, title, description, image, imageAlt = "" } = Astro.props;
+const isList = Array.isArray(description);
+---
+
+<article
+  class="relative flex flex-col gap-6 rounded-3xl border-2 border-strong bg-glass-deep p-2 backdrop-blur-[1.5rem] lg:h-[22.375rem] lg:flex-row lg:items-stretch lg:gap-12"
+>
+  <!-- Левая часть: номер + текст -->
+  <div class="flex flex-1 gap-12 p-6">
+    <span class="shrink-0 w-20 text-h3 font-medium text-text-primary">
+      {number}
+    </span>
+    <div class="flex flex-1 flex-col justify-between gap-6">
+      <h3 class="text-h4 font-medium text-text-primary lg:text-h3">
+        <span class="gradient-text">{highlight}</span><br />
+        {title}
+      </h3>
+
+      {
+        isList ? (
+          <ul class="dash-list flex flex-col gap-2 text-t12 text-text-primary lg:text-body">
+            {(description as string[]).map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p class="text-t12 text-text-primary lg:text-body">{description}</p>
+        )
+      }
+    </div>
+  </div>
+
+  <!-- Правая часть: картинка -->
+  <div class="relative h-[17.5rem] w-full shrink-0 overflow-hidden rounded-2xl lg:h-auto lg:w-[34.9375rem]">
+    <img
+      src={image}
+      alt={imageAlt}
+      width="559"
+      height="342"
+      loading="lazy"
+      decoding="async"
+      class="absolute inset-0 h-full w-full object-cover"
+    />
+  </div>
+</article>

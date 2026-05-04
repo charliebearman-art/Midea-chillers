@@ -1,0 +1,64 @@
+---
+interface Props {
+  href?: string;
+  variant?: "primary" | "ghost";
+  size?: "lg" | "md";
+  fullWidth?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  variant = "primary",
+  size = "lg",
+  fullWidth = false,
+  class: className = "",
+  ...rest
+} = Astro.props;
+
+const Tag = href ? "a" : "button";
+
+const base =
+  "group inline-flex items-center font-medium transition-colors duration-300 ease-out " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900";
+
+const variants = {
+  primary:
+    "bg-brand text-white hover:bg-[#EFF2F5] hover:text-text-inverse",
+  ghost:
+    "bg-glass-surface text-text-primary border border-strong hover:bg-white/[0.16]",
+};
+
+const sizes = {
+  lg: "h-12 px-5 rounded-lg text-[0.875rem] justify-center",
+  md: "h-10 pl-4 pr-1 rounded-full text-[0.875rem] gap-3",
+};
+
+const widthClass = fullWidth ? (size === "md" ? "w-full justify-between" : "w-full") : "";
+---
+
+<Tag
+  href={href}
+  class={`${base} ${variants[variant]} ${sizes[size]} ${widthClass} ${className}`}
+  {...rest}
+>
+  <slot />
+  {size === "md" && (
+    <span
+      class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white text-brand transition-colors duration-300 group-hover:bg-brand group-hover:text-[#EFF2F5]"
+      aria-hidden="true"
+    >
+      {/* Иконка: переопределяется через `slot="icon"` (например, play в Order).
+          Дефолтная — стрелка вправо (CTA «Оставить заявку», «Подробнее» и т.д.) */}
+      <slot name="icon">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+          />
+        </svg>
+      </slot>
+    </span>
+  )}
+</Tag>

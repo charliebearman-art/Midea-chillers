@@ -1,0 +1,303 @@
+---
+/**
+ * Модалка-«сториз» для Hero feature-cards (figma 986:5859).
+ *
+ * Карусель из 4 карточек 520×551px с peek-эффектом — соседние карточки
+ * частично видны по краям и затемнены через absolute-overlay (opacity 0.75).
+ * Активная карточка центрируется в viewport через translateX на track.
+ *
+ * Управление: arrow-buttons слева/справа от активной карточки + клавиши
+ * ←/→ + Esc + клик по backdrop. Открытие — из FeatureCard'ов в Hero
+ * (data-feature-card={index} → openModal(idx)).
+ *
+ * Анимации (Эмиль-style):
+ *  - Backdrop: fade-in 250ms ease-out через @starting-style
+ *  - Dialog content: scale(0.97) + opacity-0 → scale(1) opacity-1, 250ms
+ *    cubic-bezier(0.32, 0.72, 0, 1) (iOS-easing). Старт со scale(0.95)
+ *    обеспечивает «у воздушного шарика есть форма даже сдутого» — никакого
+ *    появления-из-ничего.
+ *  - Track-translate между карточками: 400ms cubic-bezier(0.32, 0.72, 0, 1).
+ *  - Overlay opacity active↔dimmed: 300ms ease-out.
+ */
+
+interface Feature {
+  title: string;
+  description: string;
+  image: string;
+  imageAlt?: string;
+}
+
+const features: Feature[] = [
+  {
+    title: "Всегда в наличии на складе",
+    description: "На складе представлены чиллеры холодопроизводительностью от 5 до 164 кВт в моноблочном исполнении. При модульном объединении суммарная мощность достигает 2 080 кВт — это лёгкая масштабируемость и быстрый запуск проектов любого уровня сложности.",
+    image: "/images/story-warehouse.jpg",
+  },
+  {
+    title: "Решение без аналогов в РФ",
+    description: "Инновации, которые выделяют проект на фоне конкурентов. Собственные технические разработки дистрибьютора и завода-изготовителя делают это решение безальтернативным — переподбор на аналог невозможен.",
+    image: "/images/story-midea.jpg",
+  },
+  {
+    title: "Технология Plug&Play",
+    description: "Не нужен отдельный выносной гидромодуль под заказ — система полностью готова к монтажу и пусконаладке прямо из коробки. Проще установки чиллера ещё не было.",
+    image: "/images/story-plugplay.jpg",
+  },
+  {
+    title: "На 30% ниже расход электроэнергии",
+    description: "До 30% экономии на электроэнергии благодаря инверторному компрессору. Поставка со склада сокращает цикл сделки и снижает издержки по проекту.",
+    image: "/images/story-energy.jpg",
+  },
+];
+---
+
+<dialog
+  data-feature-modal
+  class="feature-modal m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/60 backdrop:backdrop-blur-[12px]"
+>
+  <!-- Close-кнопка фиксирована в правом-верхнем углу viewport, поверх всего. -->
+  <button
+    type="button"
+    data-modal-close
+    aria-label="Закрыть"
+    class="fixed right-10 top-10 z-10 flex h-12 w-12 items-center justify-center rounded-full bg-text-primary text-ink-base transition-colors hover:bg-brand hover:text-white"
+  >
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 13.5 13.5"
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      {/* Figma 410:898 (Navigation/close_large) — filled path, не stroke.
+          Закруглённые "перья" концов X из bezier-кривых, выглядит толще
+          и аккуратнее обычного stroke. */}
+      <path
+        fill-rule="evenodd"
+        clip-rule="evenodd"
+        d="M12.2197 0.21967C12.5126 -0.07321 12.9874 -0.07321 13.2803 0.21967C13.5731 0.51256 13.5731 0.98744 13.2803 1.28033L7.81066 6.75L13.2803 12.2197C13.5731 12.5126 13.5731 12.9874 13.2803 13.2803C12.9874 13.5731 12.5126 13.5731 12.2197 13.2803L6.75 7.81066L1.28033 13.2803C0.98744 13.5731 0.51256 13.5731 0.21967 13.2803C-0.07321 12.9874 -0.07321 12.5126 0.21967 12.2197L5.68934 6.75L0.21967 1.28033C-0.07321 0.98744 -0.07321 0.51256 0.21967 0.21967C0.51256 -0.07321 0.98744 -0.07321 1.28033 0.21967L6.75 5.68934L12.2197 0.21967Z"
+      />
+    </svg>
+  </button>
+
+  <!-- Wrapper для центрирования карусели в viewport. relative — основа для
+       absolute-arrows, точно по бокам активной карточки. -->
+  <div class="relative flex h-full w-full items-center justify-center">
+    <!-- Виртуальная «активная» рамка — невидимый bookmark для arrow-positioning.
+         Шириной как одна карточка (32.5rem); arrows прижаты к её бокам через
+         absolute -left/-right. Так стрелки всегда «у краёв активной».
+         data-modal-content помечает «не-backdrop» зону: клики внутри (карта,
+         стрелки) не закрывают модалку, клики снаружи — закрывают. -->
+    <div data-modal-content class="relative w-[32.5rem]">
+      <!-- Prev-arrow: left-[-72px] = 4.5rem за левый край активной карточки. -->
+      <button
+        type="button"
+        data-modal-prev
+        aria-label="Предыдущая"
+        disabled
+        class="absolute -left-[4.5rem] top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base opacity-100 transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 16 16"
+          fill="currentColor"
+          class="rotate-180"
+          aria-hidden="true"
+        >
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+          />
+        </svg>
+      </button>
+
+      <!-- Track: 4 карточки в flex-row, gap-6 (=24px). translateX зависит
+           от активного индекса. Позиционирован absolute, чтобы вычисление
+           translate шло от left:0 wrapper-а (= центр активной). -->
+      <div
+        data-modal-track
+        class="absolute left-0 top-1/2 flex -translate-y-1/2 gap-6 transition-transform duration-[400ms] [transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
+      >
+        {
+          features.map((feature, i) => (
+            <article
+              data-modal-card
+              data-card-index={i}
+              data-active={i === 0 ? "true" : "false"}
+              class="relative flex h-[34.4375rem] w-[32.5rem] shrink-0 flex-col gap-6 overflow-hidden rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-6 pt-2 backdrop-blur-[24px]"
+            >
+              {/* Dimmed overlay для неактивных карточек (peek-эффект).
+                  pointer-events-none, чтобы не блокировал клики на потенциальных
+                  ссылках внутри (на будущее). */}
+              <span
+                aria-hidden="true"
+                data-modal-overlay
+                class="pointer-events-none absolute inset-0 rounded-3xl bg-black opacity-75 transition-opacity duration-300 ease-out"
+              />
+              <div class="aspect-[543/342] w-full shrink-0 overflow-hidden rounded-2xl bg-[#313131]">
+                <img
+                  src={feature.image}
+                  alt={feature.imageAlt ?? feature.title}
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+              <div class="flex flex-col gap-4 px-4 text-text-primary">
+                <h3 class="text-h2 font-medium">{feature.title}</h3>
+                <p class="text-body">{feature.description}</p>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+
+      <!-- Next-arrow: right-[-72px] -->
+      <button
+        type="button"
+        data-modal-next
+        aria-label="Следующая"
+        class="absolute -right-[4.5rem] top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-text-primary text-ink-base transition-[opacity,background-color] duration-200 hover:bg-brand hover:text-white disabled:pointer-events-none disabled:opacity-30"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+          <path
+            fill-rule="evenodd"
+            clip-rule="evenodd"
+            d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+          />
+        </svg>
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<style>
+  /* Active overlay невидим — карточка показывается полностью.
+     Неактивные затемняются (peek-эффект из figma 986:5859 → I986:5859;410:1262 etc). */
+  [data-modal-card][data-active="true"] [data-modal-overlay] {
+    opacity: 0;
+  }
+
+  /* Track-translate: смещает на N карточек влево от левого края wrapper-а.
+     wrapper.left=0 совпадает с left активной карточки, поэтому translate
+     отрицательный → активная подъезжает к wrapper.left. */
+  [data-modal-track] {
+    transform: translateY(-50%) translateX(calc(-1 * var(--active-index, 0) * (32.5rem + 1.5rem)));
+  }
+
+  /* Open-анимация native dialog: scale + fade-in 250ms (Эмиль-style).
+     @starting-style работает в Chrome 117+ — fallback к мгновенному
+     открытию в старых браузерах. */
+  .feature-modal[open] {
+    opacity: 1;
+    transform: scale(1);
+    transition:
+      opacity 250ms cubic-bezier(0.32, 0.72, 0, 1),
+      transform 250ms cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  @starting-style {
+    .feature-modal[open] {
+      opacity: 0;
+      transform: scale(0.97);
+    }
+  }
+  .feature-modal[open]::backdrop {
+    opacity: 1;
+    transition: opacity 250ms ease-out;
+  }
+  @starting-style {
+    .feature-modal[open]::backdrop {
+      opacity: 0;
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>("[data-feature-modal]");
+  const track = dialog?.querySelector<HTMLElement>("[data-modal-track]");
+  const cards = dialog?.querySelectorAll<HTMLElement>("[data-modal-card]");
+  const prevBtn = dialog?.querySelector<HTMLButtonElement>("[data-modal-prev]");
+  const nextBtn = dialog?.querySelector<HTMLButtonElement>("[data-modal-next]");
+  const closeBtn = dialog?.querySelector<HTMLButtonElement>("[data-modal-close]");
+
+  if (dialog && track && cards && prevBtn && nextBtn && closeBtn) {
+    let active = 0;
+
+    const update = () => {
+      track.style.setProperty("--active-index", String(active));
+      cards.forEach((c, i) => {
+        c.dataset.active = i === active ? "true" : "false";
+      });
+      prevBtn.disabled = active === 0;
+      nextBtn.disabled = active === cards.length - 1;
+    };
+
+    prevBtn.addEventListener("click", () => {
+      if (active > 0) {
+        active--;
+        update();
+      }
+    });
+    nextBtn.addEventListener("click", () => {
+      if (active < cards.length - 1) {
+        active++;
+        update();
+      }
+    });
+    closeBtn.addEventListener("click", () => dialog.close());
+
+    /** Backdrop-click: закрытие при клике вне «активной» области карусели.
+     *  e.target === dialog не работает (диалог full-screen и вся площадь
+     *  занята вложенным flex-wrapper'ом). Поэтому проверяем, попал ли клик
+     *  внутрь [data-modal-content] (= карта + стрелки) — если нет, закрываем.
+     *  Close-button обрабатывает свой клик отдельно (через свой listener),
+     *  поэтому он сам по себе не входит в content и его клик закрывает.
+     *  Mousedown — не click — чтобы не реагировать на drag-select текста,
+     *  начавшийся внутри карты и закончившийся снаружи. */
+    let mouseDownOnBackdrop = false;
+    dialog.addEventListener("mousedown", (e) => {
+      const target = e.target as HTMLElement;
+      const inContent = target.closest("[data-modal-content]");
+      const inClose = target.closest("[data-modal-close]");
+      mouseDownOnBackdrop = !inContent && !inClose;
+    });
+    dialog.addEventListener("mouseup", (e) => {
+      const target = e.target as HTMLElement;
+      const inContent = target.closest("[data-modal-content]");
+      const inClose = target.closest("[data-modal-close]");
+      if (mouseDownOnBackdrop && !inContent && !inClose) {
+        dialog.close();
+      }
+      mouseDownOnBackdrop = false;
+    });
+
+    /** Клавиатурная навигация: ←/→ между карточками, Esc закрывает (нативно
+     *  обрабатывается dialog'ом, но keydown даёт нам контроль). */
+    dialog.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" && active > 0) {
+        active--;
+        update();
+      } else if (e.key === "ArrowRight" && active < cards.length - 1) {
+        active++;
+        update();
+      }
+    });
+
+    /** Открытие из Hero feature-cards. Card передаёт data-feature-card={index}
+     *  → берём индекс, ставим active, открываем dialog. */
+    document.querySelectorAll<HTMLElement>("[data-feature-card]").forEach((card) => {
+      card.addEventListener("click", (e) => {
+        const raw = card.dataset.featureCard;
+        if (raw === undefined) return;
+        const idx = Number(raw);
+        if (Number.isNaN(idx)) return;
+        e.preventDefault();
+        active = idx;
+        update();
+        dialog.showModal();
+      });
+    });
+  }
+</script>
