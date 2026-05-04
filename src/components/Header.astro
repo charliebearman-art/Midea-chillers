@@ -178,12 +178,17 @@ const navLinks = [
   [data-mobile-cta] {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     background: var(--brand);
     color: #fff;
     border-radius: 6.25rem; /* 100 — figma rounded-[100px] */
-    padding: 0.125rem 0.5rem; /* 2 / 8 */
+    /* Явная высота + line-height:1 + горизонтальный padding —
+       альтернатива vertical-padding+line-height:1.6, при котором
+       Cyrillic-метрики Gotham Pro Medium прижимали глифы к верху. */
+    height: 1.45rem; /* 12 + 4×2 padding по figma → ~23px */
+    padding: 0 0.5rem; /* 0 / 8 */
     font-size: 0.75rem; /* 12 */
-    line-height: 1.6;
+    line-height: 1;
     font-weight: 500;
     white-space: nowrap;
   }
