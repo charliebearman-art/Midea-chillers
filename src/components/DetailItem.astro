@@ -3,6 +3,9 @@
  * Карточка-деталь: номер слева, текст по центру, картинка справа.
  * Используется в секции "Готовое решение от производителя чиллеров №1".
  */
+import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
+
 interface Props {
   number: string;
   /** Первая часть заголовка с акцентом-градиентом (e.g. "На 45% дешевле,") */
@@ -11,7 +14,8 @@ interface Props {
   title: string;
   /** Текст описания. Можно строкой или массивом (тогда выводим списком) */
   description: string | string[];
-  image: string;
+  /** ImageMetadata из import — Astro строит WebP, проставляет width/height. */
+  image: ImageMetadata;
   imageAlt?: string;
 }
 
@@ -49,11 +53,11 @@ const isList = Array.isArray(description);
 
   <!-- Правая часть: картинка -->
   <div class="relative h-[17.5rem] w-full shrink-0 overflow-hidden rounded-2xl lg:h-auto lg:w-[34.9375rem]">
-    <img
+    <Image
       src={image}
       alt={imageAlt}
-      width="559"
-      height="342"
+      widths={[559, 1118]}
+      sizes="(min-width: 640px) 559px, 100vw"
       loading="lazy"
       decoding="async"
       class="absolute inset-0 h-full w-full object-cover"

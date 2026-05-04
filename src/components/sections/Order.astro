@@ -73,11 +73,11 @@ import VideoModal from "../VideoModal.astro";
           muted
           loop
           playsinline
-          preload="auto"
+          preload="none"
           aria-hidden="true"
           class="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
-          <source src="/videos/numberonesmall.mp4" type="video/mp4" />
+          <source data-src="/videos/numberonesmall.mp4" type="video/mp4" />
         </video>
         <Button size="md" class="absolute bottom-6 right-6" data-video-trigger>
           Смотреть видео
@@ -121,6 +121,8 @@ import VideoModal from "../VideoModal.astro";
         <img
           src="/images/usp-skyscraper.jpg"
           alt="Офис «Даичи»"
+          width="1280"
+          height="943"
           loading="lazy"
           decoding="async"
           class="pointer-events-none absolute inset-0 h-full w-full object-cover"

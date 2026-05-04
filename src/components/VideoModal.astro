@@ -2,11 +2,13 @@
 /**
  * Модалка с rutube-видео. Открывается из Order («Смотреть видео»).
  *
- * iframe `src` устанавливается лениво — только при первом открытии:
- *  - не грузим rutube при первом рендере страницы (≈400 KB трафика),
- *  - не запускаем autoplay в фоне до того как пользователь кликнул.
- * При закрытии `src` сбрасывается, чтобы видео остановилось и не
- *  играло в фоне (rutube-плеер не имеет `pause()` API через postMessage).
+ * Facade pattern: iframe рендерится БЕЗ src — никаких rutube-запросов
+ * (~400 KB) при первой загрузке страницы. Триггер (data-video-trigger)
+ * визуально подменяет iframe — у нас это кнопка поверх фонового
+ * <video> в Order, которое и работает как poster-preview. Только при
+ * клике на триггер JS подставляет src в iframe и открывает диалог.
+ * При закрытии src обнуляется → плеер выгружается (rutube не даёт
+ * pause() через postMessage, поэтому это единственный способ остановить).
  *
  * Стиль наследуется от FeatureModal/ProjectModal: тот же backdrop blur+dim,
  * та же close-кнопка (figma 410:898), то же mousedown/mouseup-ловление
@@ -37,9 +39,11 @@ const VIDEO_URL = "https://rutube.ru/play/embed/f54b027bc9a7043dd7dbcde8145aaeab
   <div class="flex h-full w-full items-center justify-center px-4 py-10 lg:px-8">
     <div data-modal-content class="w-full max-w-[64rem]">
       <div class="aspect-video w-full overflow-hidden rounded-2xl bg-black">
+        <!-- src НЕ задаём в шаблоне — facade pattern: rutube подгружается
+             только после клика на data-video-trigger (см. <script> ниже). -->
         <iframe
           data-video-frame
-          src={VIDEO_URL}
+          title="Видео о продукте"
           loading="lazy"
           allow="clipboard-write; autoplay"
           allowfullscreen

@@ -1,6 +1,8 @@
 ---
 import "../styles/global.css";
 import Toast from "../components/Toast.astro";
+import { getImage } from "astro:assets";
+import heroCityImg from "../assets/images/hero-city.jpg";
 
 interface Props {
   title?: string;
@@ -11,6 +13,11 @@ const {
   title = "Модульные чиллеры Midea со встроенным гидромодулем — Daichi",
   description = "Уникальное техническое решение для рынка РФ. Чиллеры Midea с гидромодулем — всегда в наличии, технология Plug&Play, на 30% ниже расход электроэнергии.",
 } = Astro.props;
+
+// Preload оптимизированного WebP hero-poster — тот же URL, что использует
+// Hero.astro в <video poster>. Один и тот же getImage() внутри Astro
+// кешируется, так что фактически генерится один файл.
+const heroCityWebp = await getImage({ src: heroCityImg, format: "webp" });
 ---
 
 <!doctype html>
@@ -35,8 +42,9 @@ const {
 <link rel="preload" href="/fonts/GothamPro-Bold.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="preload" href="/fonts/GothamPro-Medium.woff2" as="font" type="font/woff2" crossorigin />
 
-    <!-- preload hero-картинки для LCP -->
-    <link rel="preload" as="image" href="/images/hero-city.jpg" />
+    <!-- preload hero-картинки для LCP. fetchpriority="high" сообщает
+         браузеру, что этот ресурс критичен и нужен раньше остальных. -->
+    <link rel="preload" as="image" href={heroCityWebp.src} type="image/webp" fetchpriority="high" />
 
     <title>{title}</title>
 
@@ -49,5 +57,27 @@ const {
   <body>
     <Toast />
     <slot />
+
+    <!-- Плавный скролл страницы (SmoothScroll.js) — те же параметры,
+         что у aircon-wifi.ru: 800 ms догон + step 75 px. -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/smoothscroll/1.4.10/SmoothScroll.min.js"
+      integrity="sha256-huW7yWl7tNfP7lGk46XE+Sp0nCotjzYodhVKlwaNeco="
+      crossorigin="anonymous"
+      is:inline></script>
+    <script is:inline>
+      SmoothScroll({
+        animationTime: 800,
+        stepSize: 75,
+        accelerationDelta: 30,
+        accelerationMax: 2,
+        keyboardSupport: true,
+        arrowScroll: 50,
+        pulseAlgorithm: true,
+        pulseScale: 4,
+        pulseNormalize: 1,
+        touchpadSupport: true,
+      });
+    </script>
   </body>
 </html>

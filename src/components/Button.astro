@@ -51,7 +51,9 @@ const widthClass = fullWidth ? (size === "md" ? "w-full justify-between" : "w-fu
       {/* Иконка: переопределяется через `slot="icon"` (например, play в Order).
           Дефолтная — стрелка вправо (CTA «Оставить заявку», «Подробнее» и т.д.) */}
       <slot name="icon">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <!-- viewBox + class h-4 w-4 — иконка флюид-скейлится вместе с rem,
+             не пиксельно. Атрибуты width/height опущены: размер задаёт CSS. -->
+        <svg viewBox="0 0 16 16" fill="currentColor" class="h-4 w-4">
           <path
             fill-rule="evenodd"
             clip-rule="evenodd"

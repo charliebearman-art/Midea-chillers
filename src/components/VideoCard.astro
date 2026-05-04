@@ -27,8 +27,9 @@ const {
   <span
     class="flex h-12 w-12 items-center justify-center rounded-full bg-white text-ink-900 transition-transform duration-300 group-hover:scale-110"
   >
-    <!-- иконка play -->
-    <svg width="14" height="16" viewBox="0 0 14 16" fill="none" aria-hidden="true">
+    <!-- иконка play. viewBox + класс h-4 — флюид-размер вместе с rem
+         (а не фикс 14×16px). aspect-ratio 14:16 удерживает viewBox. -->
+    <svg viewBox="0 0 14 16" fill="none" aria-hidden="true" class="h-4 w-auto">
       <path d="M13 7.13397C13.6667 7.51887 13.6667 8.48113 13 8.86603L2 15.2206C1.33333 15.6055 0.5 15.1244 0.5 14.3546L0.5 1.64545C0.5 0.875645 1.33333 0.394521 2 0.779421L13 7.13397Z" fill="currentColor"/>
     </svg>
   </span>

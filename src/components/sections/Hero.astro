@@ -3,6 +3,12 @@ import Button from "../Button.astro";
 import FeatureCard from "../FeatureCard.astro";
 import FeatureModal from "../FeatureModal.astro";
 import VideoCard from "../VideoCard.astro";
+import { getImage } from "astro:assets";
+import heroCityImg from "../../assets/images/hero-city.jpg";
+
+// poster у <video> принимает только URL-строку, поэтому через getImage
+// получаем оптимизированный WebP-URL и передаём как строку.
+const heroCityWebp = await getImage({ src: heroCityImg, format: "webp" });
 
 const features = [
   {
@@ -39,7 +45,7 @@ const features = [
       loop
       playsinline
       preload="auto"
-      poster="/images/hero-city.jpg"
+      poster={heroCityWebp.src}
       aria-hidden="true"
       class="aspect-[1440/810] h-auto w-full object-cover"
     >

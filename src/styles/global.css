@@ -60,6 +60,10 @@
      (font 1.111vw vs pad 4vw → разные коэффициенты), и весь rem-based layout
      визуально расходится с container-padding. */
   --container-pad: 2.5rem;
+
+  /* Кастомные кривые (Emil-style: built-in CSS easings слабые). */
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* ---------- Base ---------- */
@@ -237,12 +241,6 @@ a {
   top: 0;
 }
 
-/* ---------- Кастомные кривые (Emil-style: built-in CSS easings слабые) ---------- */
-:root {
-  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
-}
-
 /* плавный fade-up при загрузке (CSS-only, без JS) */
 .reveal {
   opacity: 0;
@@ -259,23 +257,24 @@ a {
   }
 }
 
-/* Word-by-word reveal с blur-mask: blur маскирует переход между state-ами,
-   глаз видит единое мягкое появление вместо двух кадров. */
+/* Word-by-word reveal: только opacity + translateY — оба composited
+   на GPU, не триггерят layout/paint. Раньше использовался filter:blur
+   для softening, но он не GPU-ускорен (PageSpeed-флаг). Эффект
+   мягкости компенсируем чуть большей дистанцией translateY (0.5em
+   вместо 0.4em) + ease-out-strong-кривой. */
 .word-reveal {
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.4em);
-  filter: blur(6px);
+  transform: translateY(0.5em);
   animation: word-reveal-in 800ms var(--ease-out-strong) forwards;
   animation-delay: var(--word-delay, 0ms);
-  will-change: opacity, transform, filter;
+  will-change: opacity, transform;
 }
 
 @keyframes word-reveal-in {
   to {
     opacity: 1;
     transform: translateY(0);
-    filter: blur(0);
   }
 }
 
