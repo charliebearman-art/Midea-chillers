@@ -101,7 +101,7 @@ const inputs: InputField[] = [
       <!-- Состояние формы: idle / loading. Success и error — через toast
            (см. Toast.astro). После success форма очищается и возвращается
            в idle; после error остаётся в idle с сохранёнными данными. -->
-      <div class="flex flex-col gap-12">
+      <div class="flex flex-col gap-6 lg:gap-12">
         <div class="flex flex-col gap-6">
         {
           inputs.map((field) => (
@@ -175,7 +175,7 @@ const inputs: InputField[] = [
              Native <button> вместо <Button>-компонента — нужен контроль
              над disabled/textContent для loading-состояния. Стили скопированы
              из Button.astro (variant=primary, size=lg). -->
-        <div class="flex flex-col-reverse gap-2 lg:flex-row lg:items-center lg:gap-12">
+        <div class="flex flex-col-reverse gap-3 lg:flex-row lg:items-center lg:gap-12">
           <p class="flex-1 text-center text-t12 text-text-primary lg:text-left">
             Нажимая кнопку, вы&nbsp;соглашаетесь с&nbsp;<a
               href="https://air-midea.com/privacy"
