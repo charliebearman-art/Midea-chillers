@@ -21,11 +21,17 @@ import VideoModal from "../VideoModal.astro";
  */
 ---
 
+<!-- Bg задаём через linear-gradient: солидный #0f1115 на 99%, затем за
+     последние ~200px плавно угасает в transparent. Иначе hard-edge снизу
+     Order'а образует видимый «шов» в месте, где из-под него начинает
+     проявляться глоу-эллипс (он же -z-10 внутри Order и закрыт bg-ink-base
+     внутри его bbox, но виден ниже — где Projects прозрачен). Плавный
+     fade-out низа Order'а делает переход бесшовным. -->
 <section
   id="order"
   data-order-section
-  class="relative z-10 -mt-[60px] rounded-t-3xl bg-ink-base"
-  style="transform: translateY(60px)"
+  class="relative z-10 -mt-[60px] rounded-t-3xl"
+  style="transform: translateY(60px); background: linear-gradient(to bottom, #0f1115 0%, #0f1115 calc(100% - 240px), transparent 100%);"
 >
   <!-- Размытый эллипс-glow (Figma 894:4635). Order имеет z-10, поэтому
        нижняя часть эллипса, выходящая за нижнюю границу Order, остаётся

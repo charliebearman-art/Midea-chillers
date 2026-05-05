@@ -344,15 +344,14 @@ a {
 }
 
 /* Спейсер: даёт card 04 sticky-время после её natural-position.
-   Mobile: 6rem (~96px sticky-этап для card 04 перед unstick).
+   Mobile: 6rem fallback — JS (lib/mobile-curtain.ts) перезаписывает inline на
+     `cardH + 4rem` после замера card 04 (variable height из-за content-fit).
    Desktop: card_height + 5rem - 1.5rem = 25.875rem (математически
-   синхронно с Products curtain).
+     синхронно с Products curtain mt).
 
    Products curtain mt:
-   Mobile: не применяется — на мобиле curtain делается через
-     data-mobile-slide-up (см. lib/mobile-reveal.ts), который даёт
-     translateY(60→0) при входе Products в viewport, без зависимости
-     от варьирующейся card_height.
+   Mobile: JS проставляет inline `marginTop: -cardH` (lib/mobile-curtain.ts) —
+     полное накрытие card 04 как и на десктопе, но c учётом variable height.
    Desktop: -22.375rem (= -card_height) → полное накрытие card 04. */
 .details-spacer {
   height: 6rem;

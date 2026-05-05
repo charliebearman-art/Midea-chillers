@@ -128,9 +128,13 @@ const products = [
 ];
 ---
 
+<!-- На мобиле curtain делается через `.products-curtain margin-top:-cardH`
+     (см. lib/mobile-curtain.ts), синхронно с sticky-стеком Details. Поэтому
+     `data-mobile-slide-up` тут не нужен — иначе translateY(60→0) сдвигает
+     Products вниз относительно своего natural-position и ломает тайминг
+     curtain'а (начало/конец накрытия card 04 уезжает на 60px). -->
 <section
   id="products"
-  data-mobile-slide-up
   class="products-curtain relative z-30 rounded-t-3xl bg-ink-surface lg:rounded-t-[2rem]"
 >
   <div class="container-x py-12 lg:px-10 lg:py-20">
