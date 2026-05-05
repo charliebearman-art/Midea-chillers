@@ -123,7 +123,6 @@ const projects: Project[] = [
          программно в JS на drag-end и при кликах по стрелкам. -->
     <div
       data-projects-track
-      data-reveal-stagger="80"
       class="-mx-2 flex cursor-grab select-none gap-2 overflow-x-auto scroll-smooth px-2 pb-2 lg:gap-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       {
@@ -131,9 +130,6 @@ const projects: Project[] = [
           <button
             type="button"
             data-project-card={i}
-            data-reveal
-            data-reveal-slide-right
-            data-reveal-image
             class="group flex w-[17.5rem] shrink-0 cursor-grab flex-col gap-4 rounded-3xl border-2 border-strong bg-black/40 px-2 pb-4 pt-2 text-left transition-colors duration-300 hover:border-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand lg:w-[25.9375rem] lg:gap-6 lg:pb-6"
           >
             <div class="relative aspect-[543/342] w-full overflow-hidden rounded-2xl">
