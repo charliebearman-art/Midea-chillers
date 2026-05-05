@@ -2,6 +2,8 @@
 
 Лендинг «Модульные чиллеры Midea со встроенным гидромодулем» для размещения по адресу **`https://air-midea.com/gmchillerspromo/`** (подпапка существующего сайта).
 
+**Репозиторий**: https://github.com/charliebearman-art/Midea-chillers
+
 ## Tech stack
 
 - **Astro 5** (SSG, output: static) — генерирует чистый HTML/CSS/JS

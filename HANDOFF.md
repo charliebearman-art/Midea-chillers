@@ -2,6 +2,22 @@
 
 Документ описывает что нужно сделать, чтобы лендинг заработал в production по адресу `https://air-midea.com/gmchillerspromo/`.
 
+## Доступ к проекту
+
+**Git-репозиторий**: https://github.com/charliebearman-art/Midea-chillers
+
+Если репо **приватный** — попросите владельца (Кирилл Погорелов) добавить вас как collaborator с правами `read` (или `write`, если планируете править код напрямую).
+
+После добавления:
+```bash
+git clone https://github.com/charliebearman-art/Midea-chillers.git
+cd Midea-chillers
+npm install
+npm run build       # → dist/
+```
+
+Текущая ветка для production: `main`. Тег handoff-релиза: см. `git tag` (если задан).
+
 ---
 
 ## 1. Деплой статики

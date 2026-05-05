@@ -3,7 +3,8 @@
 > **Тип**: Story
 > **Epic**: Промо-лендинг модульных чиллеров Midea
 > **Estimate**: 4–8 ч (deploy + form integration без spam-protection)
-> **Зависимости**: репозиторий и доступ к `air-midea.com` инфраструктуре
+> **Репозиторий**: https://github.com/charliebearman-art/Midea-chillers
+> **Зависимости**: read-доступ к git-репо (если private — попросить у Кирилла), доступ к `air-midea.com` инфраструктуре
 
 ---
 
