@@ -318,16 +318,10 @@ a {
   }
 }
 
-/* Sticky-стек для карточек + curtain Products. И на мобиле, и на десктопе —
-   карточки 01-04 залипают одной верхней линией, более поздние карточки
-   z-index перекрывают предыдущие. Различается только top:
-   мобиля = 5rem (header h-16 + 1rem отступ), десктоп = 18.9rem (под h2).
-   Брейкпоинт 640 синхронизирован с tailwind.config.mjs (lg: "640px"). */
-.detail-stack-item {
-  position: sticky;
-  top: 5rem; /* 64px header + 16px gap = 80px на мобиле */
-  z-index: calc(10 + var(--stack-index, 0));
-}
+/* Sticky-cascade и Products curtain — только на десктопе.
+   На мобиле (per figma 750:3643) карточки в обычном column flow,
+   sticky/curtain не используются. Брейкпоинт 640 синхронизирован
+   с tailwind.config.mjs (lg: "640px"). */
 @media (min-width: 640px) {
   html {
     /* Десктопный header h-20 = 80px = 5rem */
@@ -335,29 +329,28 @@ a {
   }
 
   .detail-stack-item {
+    position: sticky;
     /* h2 sticky-top 9rem + h2 height 6.9rem (text-h1 × 1.15 × 2 строки)
        + 3rem (48px gap до карточки, mb-12) = 18.9rem.
        Все 4 карточки залипают на ОДНОЙ ПОЗИЦИИ — стек по верхней линии
        без cascade-смещения, z-index определяет порядок наложения. */
     top: 18.9rem;
+    z-index: calc(10 + var(--stack-index, 0));
   }
 }
 
-/* Спейсер + Products mt — same math для обоих viewports:
-   spacer = card_height + желаемый_gap - flex_gap
-   Products mt = -card_height → Products полностью накрывает card 04.
-
-   Mobile:  card 34rem    + 5rem gap - 1rem (gap-4)   = 38rem   spacer
-            Products mt = -34rem
-   Desktop: card 22.375rem + 5rem gap - 1.5rem (gap-6) = 25.875rem
-            Products mt = -22.375rem
-*/
+/* Спейсер + Products mt подобраны математически для desktop sticky-стека:
+     spacer = card_height + желаемый_gap - flex_gap = 22.375 + 5 - 1.5 = 25.875rem
+     Products mt = -card_height = -22.375rem
+   На мобиле спейсер скрыт (карты в normal flow, не нуждаются в нём)
+   и Products curtain отключён. */
 .details-spacer {
-  height: 38rem;
+  display: none;
   flex-shrink: 0;
 }
 @media (min-width: 640px) {
   .details-spacer {
+    display: block;
     height: 25.875rem;
   }
 }
@@ -365,7 +358,6 @@ a {
 .products-curtain {
   position: relative;
   z-index: 30;
-  margin-top: -34rem;
 }
 @media (min-width: 640px) {
   .products-curtain {
