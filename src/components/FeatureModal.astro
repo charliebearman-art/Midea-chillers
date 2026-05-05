@@ -316,14 +316,15 @@ const features: Feature[] = [
         update();
         dialog.showModal();
         if (window.innerWidth < 640) {
+          // Double-rAF: после showModal layout dialog ещё не settled, можно
+          // получить clientWidth=0/offsetLeft=0, scrollLeft становится ~0,
+          // snap-mandatory snapit к card[0] вместо запрошенной.
           requestAnimationFrame(() => {
-            const c = cards[active] as HTMLElement | undefined;
-            if (!c) return;
-            // Центрируем активную карточку в viewport: scrollLeft равен
-            // offsetLeft минус половина свободного места. Иначе карта легла
-            // бы слева (offsetLeft = 0 для левой части viewport) и peek был
-            // бы только справа — пользователь бы видел асимметрию.
-            track.scrollLeft = c.offsetLeft - (track.clientWidth - c.offsetWidth) / 2;
+            requestAnimationFrame(() => {
+              const c = cards[active] as HTMLElement | undefined;
+              if (!c) return;
+              track.scrollLeft = c.offsetLeft - (track.clientWidth - c.offsetWidth) / 2;
+            });
           });
         }
       });

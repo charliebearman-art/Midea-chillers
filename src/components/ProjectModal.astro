@@ -347,56 +347,14 @@ const projects: Project[] = [
 
     /** Открытие из карточек Projects (data-project-card={index}).
      *  На мобиле после showModal скроллим горизонтальный track к
-     *  выбранной карте через scrollLeft = offsetLeft (rAF после
-     *  showModal — иначе layout ещё не готов).
-     *
-     *  TouchMove-tracking: на мобиле без snap-mandatory native momentum
-     *  scroll может зацепить «случайный» tap на не той карточке. Если
-     *  между touchstart и click было движение > 8px — считаем это scroll,
-     *  не tap, и не открываем модалку. */
+     *  выбранной карте — но через ДВОЙНОЙ rAF, потому что после
+     *  showModal()+@starting-style layout dialog не успевает осесть
+     *  за один frame: content.clientWidth и target.offsetLeft могут
+     *  быть 0, calc отдаёт ~0, snap-mandatory snapит к card[0]
+     *  (Вектор-Бэст), и пользователь видит не ту карточку которую тапнул. */
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
-    const TAP_THRESHOLD = 8;
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
-      let touchMoved = false;
-      let touchStartX = 0;
-      let touchStartY = 0;
-
-      card.addEventListener(
-        "touchstart",
-        (e) => {
-          touchMoved = false;
-          const t = e.touches[0];
-          if (t) {
-            touchStartX = t.clientX;
-            touchStartY = t.clientY;
-          }
-        },
-        { passive: true },
-      );
-
-      card.addEventListener(
-        "touchmove",
-        (e) => {
-          const t = e.touches[0];
-          if (!t) return;
-          if (
-            Math.abs(t.clientX - touchStartX) > TAP_THRESHOLD ||
-            Math.abs(t.clientY - touchStartY) > TAP_THRESHOLD
-          ) {
-            touchMoved = true;
-          }
-        },
-        { passive: true },
-      );
-
       card.addEventListener("click", (e) => {
-        // Tap во время scroll'а — игнорируем, иначе откроется модалка
-        // не той карточки (палец двигался во время момента касания).
-        if (touchMoved) {
-          e.preventDefault();
-          e.stopPropagation();
-          return;
-        }
         const raw = card.dataset.projectCard;
         if (raw === undefined) return;
         const idx = Number(raw);
@@ -407,13 +365,16 @@ const projects: Project[] = [
         setActive(idx);
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
+          // Двойной rAF: после showModal первый frame — браузер начинает
+          // транзишн (@starting-style), второй — layout settled, clientWidth
+          // и offsetLeft валидны. Без этого calc отдаёт ~0 и snap-mandatory
+          // snapит к card[0].
           requestAnimationFrame(() => {
-            const target = cards[idx] as HTMLElement | undefined;
-            if (!target) return;
-            // Центрируем выбранную карту в viewport (см. ту же логику в
-            // FeatureModal). Без этого карта прижималась к левому краю и
-            // peek был бы только справа.
-            content.scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+            requestAnimationFrame(() => {
+              const target = cards[idx] as HTMLElement | undefined;
+              if (!target) return;
+              content.scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+            });
           });
         }
       });
