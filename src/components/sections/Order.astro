@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 import Button from "../Button.astro";
 import VideoModal from "../VideoModal.astro";
 import PlayButton from "../PlayButton.astro";
@@ -84,7 +85,7 @@ import PlayButton from "../PlayButton.astro";
           aria-hidden="true"
           class="pointer-events-none absolute inset-0 h-full w-full object-cover"
         >
-          <source data-src="/videos/numberonesmall.mp4" type="video/mp4" />
+          <source data-src={asset("/videos/numberonesmall.mp4")} type="video/mp4" />
         </video>
         <!-- Mobile: круглая play-кнопка без текста (figma 896:4785).
              Desktop: pill-кнопка «Смотреть видео» + play-иконка. -->
@@ -128,7 +129,7 @@ import PlayButton from "../PlayButton.astro";
         class="relative h-[11.4375rem] overflow-hidden rounded-2xl lg:h-auto lg:rounded-3xl"
       >
         <img
-          src="/images/usp-skyscraper.jpg"
+          src={asset("/images/usp-skyscraper.jpg")}
           alt="Офис «Даичи»"
           width="1280"
           height="943"

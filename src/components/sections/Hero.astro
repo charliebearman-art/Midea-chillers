@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 import Button from "../Button.astro";
 import FeatureCard from "../FeatureCard.astro";
 import FeatureModal from "../FeatureModal.astro";
@@ -6,7 +7,7 @@ import VideoCard from "../VideoCard.astro";
 import VideoCardModal from "../VideoCardModal.astro";
 import PlayButton from "../PlayButton.astro";
 import { getImage } from "astro:assets";
-import heroCityImg from "../../assets/images/hero-city.jpg";
+import ogImg from "../../assets/images/og.jpg";
 
 // URL Rutube-embed «Видео о продукте» — он же дефолтный в VideoCard,
 // дублируем явно чтобы мобильная PlayButton была привязана к тому же
@@ -16,25 +17,26 @@ const HERO_VIDEO_URL =
 
 // poster у <video> принимает только URL-строку, поэтому через getImage
 // получаем оптимизированный WebP-URL и передаём как строку. width:1440 —
-// размер десктоп-мастера (оригинал 2857px = 487 KiB, лишнее для poster).
-// Mobile отресэмплит ниже, разница невидима до video-load.
-const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1440 });
+// размер десктоп-мастера (оригинал 2880px = 752 KiB, лишнее для poster).
+// Mobile отресэмплит ниже, разница невидима до video-load. Используем
+// тот же og.jpg, что в og:image — единый источник истины.
+const heroPosterWebp = await getImage({ src: ogImg, format: "webp", width: 1440 });
 
 const features = [
   {
-    image: "/images/feature-warehouse.jpg",
+    image: asset("/images/feature-warehouse.jpg"),
     label: "Всегда в наличии на складе",
   },
   {
-    image: "/images/feature-midea.jpg",
+    image: asset("/images/feature-midea.jpg"),
     label: "Решение без аналогов в РФ",
   },
   {
-    image: "/images/feature-plugplay.jpg",
+    image: asset("/images/feature-plugplay.jpg"),
     label: "Технология Plug&Play",
   },
   {
-    image: "/images/feature-energy.jpg",
+    image: asset("/images/feature-energy.jpg"),
     label: "На 30% ниже расход электроэнергии",
   },
 ];
@@ -55,11 +57,11 @@ const features = [
       loop
       playsinline
       preload="auto"
-      poster={heroCityWebp.src}
+      poster={heroPosterWebp.src}
       aria-hidden="true"
       class="aspect-[1440/810] h-auto w-full object-cover"
     >
-      <source src="/videos/hero-bg.mp4" type="video/mp4" />
+      <source src={asset("/videos/hero-bg.mp4")} type="video/mp4" />
     </video>
 
     <!-- Текстурный оверлей: тилёный dot-pattern по фигме (4px source × scale 0.2,
@@ -123,7 +125,7 @@ const features = [
     <div class="rounded-2xl border-2 border-strong bg-black/20 p-4">
       <div class="flex flex-col items-center gap-4">
         <img
-          src="/images/logo-daichi.svg"
+          src={asset("/images/logo-daichi.svg")}
           alt="Daichi"
           width="120"
           height="22"

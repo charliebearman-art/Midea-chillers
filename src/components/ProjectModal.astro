@@ -1,4 +1,5 @@
 ---
+import { asset } from "../lib/asset";
 /**
  * Модалка-объект (figma 1008:9191 etc).
  *
@@ -34,7 +35,7 @@ const projects: Project[] = [
     title: "Вектор-Бэст Корпус 14, Новосибирск",
     type: "Фармацевтическое предприятие",
     address: "г. Новосибирск, Советский район, ул. Арбузова, д. 1/1",
-    image: "/images/project-vector-best.jpg",
+    image: asset("/images/project-vector-best.jpg"),
     equipment: [
       { model: "MGRH12A-PR3Z", qty: "1 шт." },
       { model: "MGRH17A-PR3-P", qty: "1 шт." },
@@ -52,7 +53,7 @@ const projects: Project[] = [
     title: "ЖК Космополит, Москва",
     type: "Жилые комплексы",
     address: "г. Москва, Шмитовский проезд, вл. 40",
-    image: "/images/project-cosmopolite.jpg",
+    image: asset("/images/project-cosmopolite.jpg"),
     equipment: [
       { model: "MCDH70A-PR3-P", qty: "8 шт." },
     ],
@@ -61,7 +62,7 @@ const projects: Project[] = [
     title: "Здание Тулунского городского суда Иркутской области, Тулун",
     type: "Административное здание",
     address: "г. Тулун, Иркутская область, Песочная улица, 2а",
-    image: "/images/project-tulun.jpg",
+    image: asset("/images/project-tulun.jpg"),
     equipment: [
       { model: "MCDH130A-PR", qty: "1 шт." },
       { model: "MCDH164A-PR3", qty: "1 шт." },
@@ -72,7 +73,7 @@ const projects: Project[] = [
     title: "Детская городская клиническая больница №5 им. Н.Ф. Филатова, Санкт-Петербург",
     type: "Больницы",
     address: "г. Санкт-Петербург, Бухарестская ул., 134",
-    image: "/images/project-filatov.jpg",
+    image: asset("/images/project-filatov.jpg"),
     equipment: [
       { model: "MCDH82A-PR3", qty: "2 шт." },
     ],
@@ -81,7 +82,7 @@ const projects: Project[] = [
     title: "Гостиница Космос, Казань",
     type: "Гостиницы",
     address: "г. Казань, ул. Лесгафта, 7",
-    image: "/images/project-cosmos.jpg",
+    image: asset("/images/project-cosmos.jpg"),
     equipment: [
       { model: "MCDH130A-PR3-P", qty: "2 шт." },
       { model: "MCDH164A-PR3-P", qty: "1 шт." },
@@ -91,7 +92,7 @@ const projects: Project[] = [
     title: "ТЗСК Тольяттинский завод стальных дисков, Тольятти",
     type: "Производственное предприятие",
     address: "г. Тольятти, Самарская область, улица Никонова, 60",
-    image: "/images/project-tzsk.jpg",
+    image: asset("/images/project-tzsk.jpg"),
     equipment: [
       { model: "MCCH130C-SA3L", qty: "1 шт." },
     ],

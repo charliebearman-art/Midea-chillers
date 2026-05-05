@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 /**
  * Контактная форма "Поможем с выбором!".
  * Двухколоночная: заголовок слева, форма справа в виде glass-card
@@ -61,7 +62,7 @@ const inputs: InputField[] = [
     aria-hidden="true"
     class="pointer-events-none absolute inset-0 -z-10 h-full w-full object-cover"
   >
-    <source data-src="/videos/backgroundsmall.mp4" type="video/mp4" />
+    <source data-src={asset("/videos/backgroundsmall.mp4")} type="video/mp4" />
   </video>
 
   <!-- Текстурный оверлей поверх видео — тот же dot-pattern, что в Hero

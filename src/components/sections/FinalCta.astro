@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 /**
  * Финальный блок «Выбирайте надёжность с чиллерами Midea» (figma 748:3199).
  * Заголовок (text-h1, "с чиллерами Midea" в брэнд-градиенте) +
@@ -28,7 +29,7 @@
          (viewBox 0 0 134 48; буквы кончаются на y≈41.44 → 6.56*80/48≈11px). -->
     <div data-reveal data-reveal-delay="120" class="flex flex-col items-center gap-4 lg:flex-row lg:items-end lg:gap-8">
       <img
-        src="/images/logo-midea99.svg"
+        src={asset("/images/logo-midea99.svg")}
         alt="midea99"
         width="222"
         height="80"
@@ -39,7 +40,7 @@
         class="text-h2 font-medium text-text-primary lg:mb-[11px]"
       >×</span>
       <img
-        src="/images/logo-daichi.svg"
+        src={asset("/images/logo-daichi.svg")}
         alt="Daichi"
         width="222"
         height="80"

@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 import ProductCard from "../ProductCard.astro";
 
 // Иконки фич — пути взяты 1:1 из Figma (24×24, currentColor наследуется от parent)
@@ -18,7 +19,7 @@ const products = [
     powerRange: "70 — 164 кВт",
     catalogHref: "https://daichi.business/support/documents/download.php?ID=27868",
     series: "AQUA THERMAL GM",
-    image: "/images/product-aqua.jpg",
+    image: asset("/images/product-aqua.jpg"),
     imageAlt: "Чиллер Midea AQUA THERMAL GM",
     features: [
       { icon: ICONS.star, title: "Эксклюзив", text: "Только в «Даичи»" },
@@ -54,7 +55,7 @@ const products = [
     powerRange: "17 — 30 кВт",
     catalogHref: "https://daichi.business/support/documents/download.php?ID=27868",
     series: "Arctic",
-    image: "/images/product-arctic.jpg",
+    image: asset("/images/product-arctic.jpg"),
     imageAlt: "Чиллер Midea Arctic",
     features: [
       { icon: ICONS.compact, title: "Компактная конструкция", text: "С фронтальным выдувом воздуха" },
@@ -90,7 +91,7 @@ const products = [
     powerRange: "5.5 — 17.3 кВт",
     catalogHref: "https://daichi.business/support/documents/download.php?ID=27868",
     series: "ECO mini",
-    image: "/images/product-eco.jpg",
+    image: asset("/images/product-eco.jpg"),
     imageAlt: "Чиллер Midea ECO mini",
     features: [
       { icon: ICONS.compact, title: "Компактная конструкция", text: "С фронтальным выдувом воздуха" },
@@ -163,7 +164,7 @@ const products = [
   >
     <div class="relative h-[11.875rem] w-full overflow-hidden rounded-2xl lg:absolute lg:inset-0 lg:h-auto lg:rounded-xl">
       <img
-        src="/images/custom-solutions.jpg"
+        src={asset("/images/custom-solutions.jpg")}
         alt=""
         width="1360" height="521"
         loading="lazy"

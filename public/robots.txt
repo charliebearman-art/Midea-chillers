@@ -1,9 +1,14 @@
+# ВНИМАНИЕ: лендинг живёт в подпапке /gmchillerspromo/ существующего сайта.
+# Этот robots.txt будет лежать по адресу air-midea.com/gmchillerspromo/robots.txt,
+# но поисковики читают robots.txt только из корня домена (air-midea.com/robots.txt).
+# Бэкендеру: смержить эти правила в корневой robots.txt существующего сайта,
+# либо настроить редирект /gmchillerspromo/robots.txt → /robots.txt.
+
 User-agent: *
-Allow: /
+Allow: /gmchillerspromo/
 
-# Запрещаем индексировать вспомогательные ассеты (поисковики и так не лезут,
-# но явно лучше).
-Disallow: /_astro/
-Disallow: /fonts/
+# Запрещаем индексировать вспомогательные ассеты.
+Disallow: /gmchillerspromo/_astro/
+Disallow: /gmchillerspromo/fonts/
 
-Sitemap: https://midea-chillers.vercel.app/sitemap.xml
+Sitemap: https://air-midea.com/gmchillerspromo/sitemap.xml

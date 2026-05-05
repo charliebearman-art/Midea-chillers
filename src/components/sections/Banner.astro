@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 import MorphPill from "../MorphPill.astro";
 import Button from "../Button.astro";
 
@@ -42,11 +43,11 @@ const ctaDelay = 360;
              каждый pill 30px высотой, padding 12/5). -->
         <div class="reveal flex w-full flex-wrap items-center justify-center gap-2 lg:hidden" style="--reveal-delay: 0ms">
           <span class="inline-flex h-[1.875rem] items-center gap-2 rounded-pill border-[1.5px] border-pill px-3 text-body font-medium leading-none text-text-primary">
-            <img src="/images/icon-star.svg" alt="" loading="eager" width="19" height="20" class="h-[1.25rem] w-auto" />
+            <img src={asset("/images/icon-star.svg")} alt="" loading="eager" width="19" height="20" class="h-[1.25rem] w-auto" />
             <span>Эксклюзив</span>
           </span>
           <span class="inline-flex h-[1.875rem] items-center gap-2 rounded-pill border-[1.5px] border-pill px-3 text-body font-medium leading-none text-text-primary">
-            <img src="/images/icon-bolt.svg" alt="" loading="eager" width="13" height="18" class="h-[1.25rem] w-auto" />
+            <img src={asset("/images/icon-bolt.svg")} alt="" loading="eager" width="13" height="18" class="h-[1.25rem] w-auto" />
             <span>Уже на&nbsp;складе</span>
           </span>
         </div>
@@ -85,7 +86,7 @@ const ctaDelay = 360;
       >
         <div class="flex flex-col items-center gap-4">
           <img
-            src="/images/logo-daichi.svg"
+            src={asset("/images/logo-daichi.svg")}
             alt="Daichi"
             width="120"
             height="22"

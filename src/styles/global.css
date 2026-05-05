@@ -7,23 +7,26 @@
    Gotham Pro — платный, положи woff2 в /public/fonts/
    До тех пор fallback на Manrope (Google Fonts) — близкий по характеру.
 */
+/* ВНИМАНИЕ: путь /gmchillerspromo/fonts/ должен совпадать с base в
+   astro.config.mjs. Astro НЕ переписывает url() в CSS, поэтому при
+   изменении base — обновить вручную здесь. */
 @font-face {
   font-family: "Gotham Pro";
-  src: url("/fonts/GothamPro-Bold.woff2") format("woff2");
+  src: url("/gmchillerspromo/fonts/GothamPro-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Gotham Pro";
-  src: url("/fonts/GothamPro-Medium.woff2") format("woff2");
+  src: url("/gmchillerspromo/fonts/GothamPro-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Gotham Pro";
-  src: url("/fonts/GothamPro-Regular.woff2") format("woff2");
+  src: url("/gmchillerspromo/fonts/GothamPro-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;

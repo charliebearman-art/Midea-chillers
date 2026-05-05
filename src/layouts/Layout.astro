@@ -2,7 +2,8 @@
 import "../styles/global.css";
 import Toast from "../components/Toast.astro";
 import { getImage } from "astro:assets";
-import heroCityImg from "../assets/images/hero-city.jpg";
+import ogImg from "../assets/images/og.jpg";
+import { asset } from "../lib/asset";
 
 interface Props {
   title?: string;
@@ -14,15 +15,18 @@ const {
   description = "Уникальное техническое решение для рынка РФ. Чиллеры Midea с гидромодулем — всегда в наличии, технология Plug&Play, на 30% ниже расход электроэнергии.",
 } = Astro.props;
 
-// Canonical URL: Astro.url работает с `site` из astro.config.mjs.
-// new URL('/', Astro.site) даёт абсолютный URL текущей страницы.
-const canonical = new URL(Astro.url.pathname, Astro.site).toString();
-const ogImageUrl = new URL("/images/og.jpg", Astro.site).toString();
+// Canonical URL: site (https://air-midea.com) + base (/gmchillerspromo/) =
+// https://air-midea.com/gmchillerspromo/. Astro.url.pathname уже включает
+// base в build, но для надёжности используем BASE_URL напрямую.
+const canonical = new URL(import.meta.env.BASE_URL, Astro.site).toString();
+const ogImageUrl = new URL(asset("/images/og.jpg"), Astro.site).toString();
+const siteUrl = Astro.site?.toString();
 
 // Preload оптимизированного WebP hero-poster — тот же URL, что использует
 // Hero.astro в <video poster>. width:1440 совпадает с Hero — getImage
-// кешируется, генерится один файл.
-const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1440 });
+// кешируется, генерится один файл. og.jpg — единый источник истины
+// для hero-постера и og:image (см. ogImageUrl выше).
+const heroPosterWebp = await getImage({ src: ogImg, format: "webp", width: 1440 });
 
 // JSON-LD structured data: Organization + WebSite + Service.
 // FAQPage задан отдельно в Faq.astro (там же контент вопросов).
@@ -30,8 +34,8 @@ const orgJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "Daichi",
-  url: Astro.site?.toString(),
-  logo: new URL("/images/logo-daichi.svg", Astro.site).toString(),
+  url: canonical,
+  logo: new URL(asset("/images/logo-daichi.svg"), Astro.site).toString(),
   description: "Дистрибьютор № 1 по поставкам модульных чиллеров Midea в России.",
   sameAs: ["https://daichi.business"],
 };
@@ -40,7 +44,7 @@ const webSiteJsonLd = {
   "@context": "https://schema.org",
   "@type": "WebSite",
   name: "Модульные чиллеры Midea — Daichi",
-  url: Astro.site?.toString(),
+  url: canonical,
   inLanguage: "ru-RU",
   description,
 };
@@ -105,13 +109,13 @@ const productJsonLd = {
       />
     </noscript>
 
-    <!-- preload критических шрифтов -->
-    <link rel="preload" href="/fonts/GothamPro-Bold.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href="/fonts/GothamPro-Medium.woff2" as="font" type="font/woff2" crossorigin />
+    <!-- preload критических шрифтов. Используем asset() helper с base-prefix. -->
+    <link rel="preload" href={asset("/fonts/GothamPro-Bold.woff2")} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={asset("/fonts/GothamPro-Medium.woff2")} as="font" type="font/woff2" crossorigin />
 
     <!-- preload hero-картинки для LCP. fetchpriority="high" сообщает
          браузеру, что этот ресурс критичен и нужен раньше остальных. -->
-    <link rel="preload" as="image" href={heroCityWebp.src} type="image/webp" fetchpriority="high" />
+    <link rel="preload" as="image" href={heroPosterWebp.src} type="image/webp" fetchpriority="high" />
 
     <title>{title}</title>
 

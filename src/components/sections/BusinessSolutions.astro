@@ -1,4 +1,5 @@
 ---
+import { asset } from "../../lib/asset";
 /**
  * Блок «Найдём решение для любого бизнеса» (figma 748:3160).
  * Десктоп: левая колонка — заголовок (text-h1, "Найдём решение " в брэнд-
@@ -115,7 +116,7 @@ const solutions: Solution[] = [
     >
       <div class="relative h-[11.875rem] w-full overflow-hidden rounded-2xl lg:absolute lg:inset-0 lg:-z-10 lg:h-auto lg:rounded-3xl">
         <img
-          src="/images/business-custom.jpg"
+          src={asset("/images/business-custom.jpg")}
           alt=""
           width="4096"
           height="1569"
