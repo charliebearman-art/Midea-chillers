@@ -135,10 +135,84 @@ const submitForm = async (): Promise<{ ok: boolean }> => {
 
 5. **CORS** — endpoint должен либо быть на том же домене (`air-midea.com/api/contact`), либо разрешить запросы с `https://air-midea.com`.
 
-6. **Защита от спама**:
-   - Honeypot/timestamp-checks или reCAPTCHA — на ваше усмотрение
-   - Если добавляется reCAPTCHA — нужно скоординировать с фронт-разработчиком (потребуются дополнительные правки в Contact.astro)
-   - Rate limiting на endpoint (5–10 запросов/минуту с IP)
+6. **Защита от спама — Yandex SmartCaptcha (invisible)**:
+
+   Согласовано использование **Yandex SmartCaptcha в advanced (invisible) режиме**. Виджет показывает challenge только при низком confidence — для большинства пользователей форма работает как обычно.
+
+   **Что нужно сделать (фронт + бэк, обе части на бэкендере):**
+
+   **A. Регистрация (1 раз):**
+   - Завести сайт в Yandex Cloud → SmartCaptcha → получить **client key** (для фронта) и **server key** (для бэка)
+   - Добавить домены: `air-midea.com` (production) + `localhost` (для dev-тестов)
+   - Mode: **Advanced challenge** (invisible)
+
+   **B. Фронт — `src/components/sections/Contact.astro`:**
+
+   1. В разметку формы добавить контейнер виджета (например, перед закрывающим `</form>`):
+      ```html
+      <div id="contact-captcha" class="hidden"></div>
+      ```
+
+   2. Подгрузить SDK Yandex (например, в самом конце `<script>` блока в Contact.astro или в `Layout.astro`):
+      ```html
+      <script
+        src="https://smartcaptcha.yandexcloud.net/captcha.js?render=onload&onload=onSmartCaptchaLoad"
+        async defer
+      ></script>
+      ```
+
+   3. В `<script>` Contact.astro инициализировать invisible widget:
+      ```ts
+      const SMARTCAPTCHA_CLIENT_KEY = "<вставить client key>";
+      let captchaWidgetId: number | null = null;
+      let captchaResolve: ((token: string) => void) | null = null;
+
+      (window as any).onSmartCaptchaLoad = () => {
+        if (!(window as any).smartCaptcha) return;
+        captchaWidgetId = (window as any).smartCaptcha.render("contact-captcha", {
+          sitekey: SMARTCAPTCHA_CLIENT_KEY,
+          invisible: true,
+          hideShield: true,
+          callback: (token: string) => {
+            captchaResolve?.(token);
+            captchaResolve = null;
+          },
+        });
+      };
+
+      const getCaptchaToken = (): Promise<string> =>
+        new Promise((resolve, reject) => {
+          if (captchaWidgetId === null) return reject(new Error("Captcha not ready"));
+          captchaResolve = resolve;
+          (window as any).smartCaptcha.execute(captchaWidgetId);
+        });
+      ```
+
+   4. В submit-обработчике (`form.addEventListener('submit', …)`) — между `validate()` и `submitForm()`:
+      ```ts
+      const captchaToken = await getCaptchaToken();
+      const formData = new FormData(form);
+      formData.append("smart-token", captchaToken);
+      const res = await fetch('/api/contact', { method: 'POST', body: formData });
+      ```
+
+      Текущий `submitForm()` принимает `form`-element, но удобнее передавать готовый `FormData` — переписать сигнатуру под это.
+
+   **C. Бэк — endpoint `/api/contact`:**
+
+   1. После приёма FormData взять поле `smart-token`.
+   2. Сделать POST-запрос на `https://smartcaptcha.yandexcloud.net/validate` с параметрами:
+      - `secret` = ваш server key
+      - `token` = `smart-token` из FormData
+      - `ip` = IP клиента (из `X-Forwarded-For`)
+   3. Парсить ответ: `{ status: "ok" | "failed", message: "..." }`. Если `status !== "ok"` — вернуть `400` (или `403`) и НЕ обрабатывать заявку.
+   4. Если `status === "ok"` — продолжить обработку (валидация, сохранение, уведомление менеджеру).
+
+   **Документация Yandex SmartCaptcha:**
+   - https://yandex.cloud/ru/docs/smartcaptcha/
+   - https://yandex.cloud/ru/docs/smartcaptcha/concepts/validation
+
+   **Дополнительно**: rate limiting на endpoint (5–10 запросов/минуту с IP) — на случай если token будет переиспользован.
 
 ### Текстовая политика конфиденциальности
 

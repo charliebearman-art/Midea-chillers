@@ -2,9 +2,9 @@
 
 > **Тип**: Story
 > **Epic**: Промо-лендинг модульных чиллеров Midea
-> **Estimate**: 4–8 ч (deploy + form integration без spam-protection)
+> **Estimate**: 6–12 ч (deploy + form + Yandex SmartCaptcha integration)
 > **Репозиторий**: https://github.com/charliebearman-art/Midea-chillers
-> **Зависимости**: read-доступ к git-репо (если private — попросить у Кирилла), доступ к `air-midea.com` инфраструктуре
+> **Зависимости**: read-доступ к git-репо (если private — попросить у Кирилла), доступ к `air-midea.com` инфраструктуре, аккаунт в Yandex Cloud для SmartCaptcha
 
 ---
 
@@ -55,6 +55,7 @@
   - `phone` (text, required)
   - `comment` (text, optional)
   - `files` (file[], optional, .jpg/.jpeg/.png ≤ 5 MB)
+  - `smart-token` (text, required — от Yandex SmartCaptcha, см. ниже)
 - [ ] При успехе возвращает `2xx`
 - [ ] При ошибке возвращает `4xx`/`5xx`
 - [ ] Форма на лендинге отправляется на этот endpoint и корректно реагирует:
@@ -62,6 +63,25 @@
   - Красный toast «Что-то пошло не так» при ошибке
 - [ ] Уведомление менеджеру приходит (email/CRM/Telegram — какой канал используется на air-midea.com)
 - [ ] Прикреплённые файлы сохраняются (опционально, согласовать с менеджером — нужно ли)
+
+### Yandex SmartCaptcha (invisible mode)
+
+- [ ] В Yandex Cloud зарегистрирован сайт + получен **client key** и **server key**
+- [ ] Mode = **Advanced challenge** (invisible)
+- [ ] Добавлены домены `air-midea.com` + `localhost` (для dev)
+- [ ] **Фронт** ([src/components/sections/Contact.astro](src/components/sections/Contact.astro)):
+  - Подгружен SDK `https://smartcaptcha.yandexcloud.net/captcha.js`
+  - Добавлен контейнер `<div id="contact-captcha" class="hidden"></div>` в форму
+  - В submit-handler перед `fetch` вызывается `smartCaptcha.execute()` → token прикладывается к FormData как `smart-token`
+- [ ] **Бэк** (endpoint `/api/contact`):
+  - Поле `smart-token` извлекается из FormData
+  - Делается POST на `https://smartcaptcha.yandexcloud.net/validate` с `secret`, `token`, `ip`
+  - При `status !== "ok"` — endpoint возвращает `403` и НЕ обрабатывает заявку
+  - Logging: failed captcha попыток
+- [ ] Тест: на чистой сессии форма отправляется без видимого виджета (invisible работает)
+- [ ] Тест: при подозрительном поведении (быстрый submit, headless-браузер) — challenge показывается / запрос блокируется
+
+Подробная инструкция в [HANDOFF.md §2.6](HANDOFF.md).
 
 ### SEO / Lighthouse
 
@@ -146,7 +166,7 @@ return { ok: res.ok };
 ## Risks
 
 - **CORS** — если API на другом домене, нужны правильные `Access-Control-*` headers
-- **Spam** — без защиты бот-формы могут флудить. Минимум: rate limiting на endpoint. Опционально: reCAPTCHA v3 (требует доп. правок на фронте, скоординировать)
+- **SmartCaptcha integration** — invisible mode требует тестирования на разных браузерах/устройствах. На headless/боты — challenge может показаться, и UX поломается, если не обработать ошибку `execute()`
 - **Конфликт URL** — если `air-midea.com/gmchillerspromo` уже используется в существующем роутинге, нужно зарезервировать
 - **Robots.txt** — существующий robots.txt на корне нужно обновить, иначе индексация лендинга может не работать
 
