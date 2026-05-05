@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/gmchillerspromo/:match*", "destination": "/:match*" }
+  ]
+}
