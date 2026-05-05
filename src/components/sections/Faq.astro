@@ -38,7 +38,24 @@ const items: Item[] = [
     answer: "Конкурируем с дешёвыми китайскими модульными чиллерами? Снова перепроектировали на OEM Midea? Инверторные модульные чиллеры Midea со встроенным гидромодулем со склада в Москве только в «Даичи».",
   },
 ];
+
+// JSON-LD FAQPage — Google показывает rich snippets с раскрывающимися
+// вопросами в выдаче. items[] = source-of-truth для markup и schema.org.
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
 ---
+
+<script type="application/ld+json" set:html={JSON.stringify(faqJsonLd)} />
 
 <section id="faq" class="relative py-12 lg:py-20">
   <!-- Ambient glow эллипс по figma 748:3189: left=861, top=23, size=1158

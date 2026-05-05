@@ -14,10 +14,63 @@ const {
   description = "Уникальное техническое решение для рынка РФ. Чиллеры Midea с гидромодулем — всегда в наличии, технология Plug&Play, на 30% ниже расход электроэнергии.",
 } = Astro.props;
 
+// Canonical URL: Astro.url работает с `site` из astro.config.mjs.
+// new URL('/', Astro.site) даёт абсолютный URL текущей страницы.
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const ogImageUrl = new URL("/images/og.jpg", Astro.site).toString();
+
 // Preload оптимизированного WebP hero-poster — тот же URL, что использует
 // Hero.astro в <video poster>. width:1440 совпадает с Hero — getImage
 // кешируется, генерится один файл.
 const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1440 });
+
+// JSON-LD structured data: Organization + WebSite + Service.
+// FAQPage задан отдельно в Faq.astro (там же контент вопросов).
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Daichi",
+  url: Astro.site?.toString(),
+  logo: new URL("/images/logo-daichi.svg", Astro.site).toString(),
+  description: "Дистрибьютор № 1 по поставкам модульных чиллеров Midea в России.",
+  sameAs: ["https://daichi.business"],
+};
+
+const webSiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Модульные чиллеры Midea — Daichi",
+  url: Astro.site?.toString(),
+  inLanguage: "ru-RU",
+  description,
+};
+
+const productJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  name: "Модульные чиллеры Midea со встроенным гидромодулем",
+  description,
+  brand: {
+    "@type": "Brand",
+    name: "Midea",
+  },
+  manufacturer: {
+    "@type": "Organization",
+    name: "Midea",
+  },
+  offers: {
+    "@type": "AggregateOffer",
+    priceCurrency: "RUB",
+    availability: "https://schema.org/InStock",
+    seller: {
+      "@type": "Organization",
+      name: "Daichi",
+      url: "https://daichi.business",
+    },
+  },
+  image: ogImageUrl,
+  category: "Промышленное холодильное оборудование",
+};
 ---
 
 <!doctype html>
@@ -27,7 +80,11 @@ const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0d12" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="generator" content={Astro.generator} />
 
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
     <!-- Manrope как fallback для Gotham Pro. Async-загрузка через preload
@@ -49,8 +106,8 @@ const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1
     </noscript>
 
     <!-- preload критических шрифтов -->
-<link rel="preload" href="/fonts/GothamPro-Bold.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/GothamPro-Medium.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/GothamPro-Bold.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/GothamPro-Medium.woff2" as="font" type="font/woff2" crossorigin />
 
     <!-- preload hero-картинки для LCP. fetchpriority="high" сообщает
          браузеру, что этот ресурс критичен и нужен раньше остальных. -->
@@ -58,11 +115,29 @@ const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1
 
     <title>{title}</title>
 
-    <!-- OG -->
+    <!-- Open Graph (Facebook, Telegram, VK, LinkedIn) -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/images/og.jpg" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Daichi" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Модульные чиллеры Midea со встроенным гидромодулем" />
+
+    <!-- Twitter Card (preview в X / Telegram через twitter fallback) -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content="Модульные чиллеры Midea со встроенным гидромодулем" />
+
+    <!-- JSON-LD structured data: Organization + WebSite + Product. -->
+    <script type="application/ld+json" set:html={JSON.stringify(orgJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(webSiteJsonLd)} />
+    <script type="application/ld+json" set:html={JSON.stringify(productJsonLd)} />
   </head>
   <body>
     <Toast />

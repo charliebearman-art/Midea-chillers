@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Запрещаем индексировать вспомогательные ассеты (поисковики и так не лезут,
+# но явно лучше).
+Disallow: /_astro/
+Disallow: /fonts/
+
+Sitemap: https://midea-chillers.vercel.app/sitemap.xml
