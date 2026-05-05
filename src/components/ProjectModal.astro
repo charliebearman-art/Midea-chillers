@@ -353,6 +353,15 @@ const projects: Project[] = [
      *  быть 0, calc отдаёт ~0, snap-mandatory snapит к card[0]
      *  (Вектор-Бэст), и пользователь видит не ту карточку которую тапнул. */
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
+
+    // Сброс carousel-scroll при закрытии модалки (любым способом — кнопка,
+    // backdrop, Esc) — иначе scrollLeft персистится через open/close и
+    // следующая открытая модалка показывает последнюю свайпнутую карточку
+    // вместо запрошенной.
+    dialog.addEventListener("close", () => {
+      if (content) content.scrollLeft = 0;
+    });
+
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.projectCard;
@@ -363,17 +372,21 @@ const projects: Project[] = [
         if (card.closest("[data-projects-track].is-dragging")) return;
         e.preventDefault();
         setActive(idx);
+        // Sync-сброс scroll перед showModal — страховка на случай если
+        // close-handler не сработал (теоретически).
+        if (content) content.scrollLeft = 0;
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
-          // Двойной rAF: после showModal первый frame — браузер начинает
-          // транзишн (@starting-style), второй — layout settled, clientWidth
-          // и offsetLeft валидны. Без этого calc отдаёт ~0 и snap-mandatory
-          // snapит к card[0].
+          // Двойной rAF + scrollIntoView: после showModal первый frame —
+          // браузер запускает transition (@starting-style), второй — layout
+          // settled. scrollIntoView с inline:'center' нативно центрирует
+          // target в scroll-parent с учётом snap-mandatory (надёжнее
+          // ручного content.scrollLeft).
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const target = cards[idx] as HTMLElement | undefined;
               if (!target) return;
-              content.scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              target.scrollIntoView({ inline: "center", block: "nearest", behavior: "instant" });
             });
           });
         }
