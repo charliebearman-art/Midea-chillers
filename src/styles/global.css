@@ -344,25 +344,28 @@ a {
 }
 
 /* Спейсер + Products mt подобраны математически:
-   1) Дают 80px видимый зазор между card 04 и Products bg-top.
-   2) В case 3 card_top = products_top геометрически (когда |mt| = card_height),
-      поэтому card 04 ПОЛНОСТЬЮ покрыта Products — никакой видимой полоски.
-   Формула: spacer = card_height + желаемый_gap - gap-6 = 22.375 + 5 - 1.5 = 25.875.
-   mt = -card_height = -22.375rem. */
+   На десктопе: card_height = 22.375rem, gap_after_card4 = 80px, flex-gap = 1.5rem
+     spacer = 22.375 + 5 - 1.5 = 25.875rem
+     Products mt = -card_height = -22.375rem
+     → Products полностью накрывает card 04 без видимой полоски.
+   На мобиле card_height auto (от content), используем меньшие фикс-значения
+   для куртенц-эффекта: spacer 6rem даёт card 04 sticky-время, Products
+   mt -4rem наезжает поверх неё. */
 .details-spacer {
-  height: 25.875rem;
+  height: 6rem;
   flex-shrink: 0;
+}
+@media (min-width: 640px) {
+  .details-spacer {
+    height: 25.875rem;
+  }
 }
 
 .products-curtain {
   position: relative;
   z-index: 30;
+  margin-top: -4rem;
 }
-
-/* Curtain-overlay только на десктопе: margin-top -22.375rem втягивает Products
-   под последнюю карточку sticky-стека Details. На мобиле sticky отключён
-   (см. @media min-width 640 выше), карточки в нормальном потоке — отрицательный
-   margin спрятал бы их за Products. Поэтому curtain-эффект скоупим в lg+. */
 @media (min-width: 640px) {
   .products-curtain {
     margin-top: -22.375rem;

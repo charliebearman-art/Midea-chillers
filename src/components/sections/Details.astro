@@ -64,7 +64,9 @@ const items = [
       </div>
     ))}
     <!-- Спейсер: добавляет content-box высоту контейнера, чтобы card 04
-         могла залипать (sticky констрейнится content-box, не padding-box) -->
-    <div aria-hidden="true" class="details-spacer hidden lg:block"></div>
+         могла залипать (sticky констрейнится content-box, не padding-box).
+         На мобиле — 6rem (короткий sticky-этап), на десктопе — 25.875rem
+         (полное покрытие Products curtain). -->
+    <div aria-hidden="true" class="details-spacer"></div>
   </div>
 </section>

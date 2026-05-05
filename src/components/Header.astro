@@ -210,6 +210,13 @@ const navLinks = [
   header[data-mobile-menu-open] [data-mobile-menu-panel] {
     grid-template-rows: 1fr;
   }
+  /* Когда меню открыто — затемняем фон шапки до 40% black для контраста
+     с текстом пунктов nav. Bg-black/[0.01] на закрытой шапке (для
+     backdrop-blur эффекта) делает её почти прозрачной — пункты меню
+     плохо читались бы поверх Hero-видео. */
+  header[data-mobile-menu-open] {
+    background: rgba(0, 0, 0, 0.4);
+  }
   [data-mobile-menu-panel] ul {
     list-style: none;
     margin: 0;
