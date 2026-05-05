@@ -120,10 +120,16 @@ const projects: Project[] = [
          snap-* НЕ используем — браузерный snap интерферирует с
          pointermove (дёргает scrollLeft) и со smooth scrollTo (резкий
          "доводчик" к снап-точке). Snap к ближайшей карточке делаем
-         программно в JS на drag-end и при кликах по стрелкам. -->
+         программно в JS на drag-end и при кликах по стрелкам.
+
+         Mobile: -mx-4 + px-4 (где container-x имеет 1rem padding) ломает
+         трек на полную ширину viewport'а — peek соседних карточек уходит
+         за пределы экрана, при этом первая карта выравнивается с
+         container-x.inner.left (visual = viewport + 1rem). На десктопе
+         оставляем -mx-2 px-2 (container-pad 2.5rem). -->
     <div
       data-projects-track
-      class="-mx-2 flex cursor-grab select-none gap-2 overflow-x-auto scroll-smooth px-2 pb-2 lg:gap-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+      class="-mx-4 flex cursor-grab select-none gap-2 overflow-x-auto scroll-smooth px-4 pb-2 lg:-mx-2 lg:gap-6 lg:px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
     >
       {
         projects.map((project, i) => (

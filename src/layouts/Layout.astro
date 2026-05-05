@@ -58,6 +58,25 @@ const heroCityWebp = await getImage({ src: heroCityImg, format: "webp" });
     <Toast />
     <slot />
 
+    <!-- --sw: ширина нативного скроллбара (vw - clientWidth). Header
+         использует её как right-offset, чтобы fixed-элемент имел ширину
+         body. На Mac overlay = 0 (no-op). На системах где scroll-bar
+         занимает layout-место (Windows/Linux/Chrome-always-show) — даёт
+         компенсацию, чтобы CTA не вылезал за правый край сетки. -->
+    <script is:inline>
+      (function () {
+        var update = function () {
+          var sw = window.innerWidth - document.documentElement.clientWidth;
+          document.documentElement.style.setProperty("--sw", sw + "px");
+        };
+        update();
+        window.addEventListener("resize", update);
+        // Скроллбар может появляться/исчезать во время скролла на некоторых
+        // OS — пересчитываем, чтобы header оставался в синке с body.
+        window.addEventListener("scroll", update, { passive: true });
+      })();
+    </script>
+
     <!-- Плавный скролл страницы (SmoothScroll.js) — те же параметры,
          что у aircon-wifi.ru: 800 ms догон + step 75 px. -->
     <script

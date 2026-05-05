@@ -1,6 +1,7 @@
 ---
 import Button from "../Button.astro";
 import VideoModal from "../VideoModal.astro";
+import PlayButton from "../PlayButton.astro";
 /**
  * Блок "Заказывайте чиллеры Midea в компании «Даичи»".
  * Заголовок (text-h1, "Заказывайте" — в брэнд-градиенте) + сетка УТП-карточек
@@ -87,16 +88,7 @@ import VideoModal from "../VideoModal.astro";
         </video>
         <!-- Mobile: круглая play-кнопка без текста (figma 896:4785).
              Desktop: pill-кнопка «Смотреть видео» + play-иконка. -->
-        <button
-          type="button"
-          data-video-trigger
-          aria-label="Смотреть видео"
-          class="absolute bottom-4 right-4 flex h-8 w-8 items-center justify-center rounded-full bg-white text-brand lg:hidden"
-        >
-          <svg viewBox="0 0 14 16" fill="currentColor" aria-hidden="true" class="h-3 w-auto">
-            <path d="M13 7.13397C13.6667 7.51887 13.6667 8.48113 13 8.86603L2 15.2206C1.33333 15.6055 0.5 15.1244 0.5 14.3546L0.5 1.64545C0.5 0.875645 1.33333 0.394521 2 0.779421L13 7.13397Z" />
-          </svg>
-        </button>
+        <PlayButton class="absolute bottom-4 right-4 lg:hidden" />
         <Button size="md" class="absolute bottom-6 right-6 hidden lg:inline-flex" data-video-trigger>
           Смотреть видео
           <svg

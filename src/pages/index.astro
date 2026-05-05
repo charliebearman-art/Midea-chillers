@@ -40,8 +40,17 @@ import FinalCta from "../components/sections/FinalCta.astro";
       <Projects />
       <BusinessSolutions />
     </div>
-    <Faq />
-    <FinalCta />
+    <!-- Wrapper для clipping Faq glow-эллипса. У Faq внутри `absolute`-
+         эллипс h:72.375rem, который на мобиле выходит за пределы FinalCta
+         и расширяет body.scrollHeight на ~300px ниже DAICHI (видимая
+         «дыра» в конце страницы). overflow-clip обрезает эллипс по
+         wrapper.bottom = FinalCta.bottom = page end. На десктопе
+         оставляем visible — там эллипс умещается в Faq+FinalCta без
+         выхода за page end (см. вычисления в комментарии Faq.astro). -->
+    <div class="overflow-clip lg:overflow-visible">
+      <Faq />
+      <FinalCta />
+    </div>
   </main>
 </Layout>
 

@@ -1,0 +1,74 @@
+---
+/**
+ * Singleton-модалка для всех `[data-video-card]` триггеров на странице.
+ * Раньше эта модалка жила внутри VideoCard.astro вместе с кнопкой —
+ * но если карточка лежала в `display:none`-контейнере (например,
+ * Hero.data-hero-cards = lg:flex hidden), то и dialog был скрыт
+ * родителем и `showModal()` не открывал его. Теперь модалка
+ * рендерится отдельно на верхнем уровне, скрипт ловит клики со
+ * ВСЕХ `[data-video-card]` элементов (VideoCard и PlayButton с videoSrc).
+ *
+ * Facade pattern: iframe.src ставится только при клике, снимается
+ * при закрытии — никаких rutube-запросов до открытия.
+ */
+---
+
+<dialog
+  data-video-dialog
+  class="m-auto rounded-2xl border border-strong bg-ink-900/95 p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm w-[min(90vw,1100px)]"
+>
+  <div class="relative aspect-video w-full">
+    <button
+      type="button"
+      data-video-close
+      aria-label="Закрыть"
+      class="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <iframe
+      data-video-player
+      title="Видео о продукте"
+      allow="clipboard-write; autoplay"
+      allowfullscreen
+      class="h-full w-full rounded-2xl border-0 bg-black"
+    >
+    </iframe>
+  </div>
+</dialog>
+
+<script>
+  /** Ленивая загрузка Rutube-iframe: src ставим при клике на любой
+   *  [data-video-card], снимаем при закрытии. Это не запускает фоновые
+   *  запросы до клика и останавливает воспроизведение/трекинг при закрытии. */
+  const cards = document.querySelectorAll<HTMLButtonElement>("[data-video-card]");
+  const dialog = document.querySelector<HTMLDialogElement>("[data-video-dialog]");
+  const player = dialog?.querySelector<HTMLIFrameElement>("[data-video-player]");
+  const closeBtn = dialog?.querySelector<HTMLButtonElement>("[data-video-close]");
+
+  if (dialog && player && closeBtn) {
+    cards.forEach((card) => {
+      card.addEventListener("click", () => {
+        const src = card.dataset.videoSrc;
+        if (src) player.src = src;
+        dialog.showModal();
+      });
+    });
+
+    const close = () => {
+      // Снимаем src — это останавливает Rutube-плеер и закрывает соединение.
+      player.removeAttribute("src");
+      dialog.close();
+    };
+
+    closeBtn.addEventListener("click", close);
+    dialog.addEventListener("click", (e) => {
+      if (e.target === dialog) close();
+    });
+    dialog.addEventListener("close", () => {
+      player.removeAttribute("src");
+    });
+  }
+</script>

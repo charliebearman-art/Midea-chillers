@@ -10,9 +10,14 @@ const navLinks = [
 ];
 ---
 
+<!-- right=var(--sw) — компенсация ширины нативного скроллбара (см. inline-
+     script в Layout.astro). На Mac overlay = 0 (no-op). На Windows/Linux/
+     Chrome-always-show: header сжимается на ширину скроллбара, чтобы его
+     внутренний container-x совпал по сетке с body container-x. -->
 <header
   data-mobile-menu
-  class="fixed left-0 top-0 z-50 w-screen max-w-[100vw] [overflow-x:clip] bg-black/[0.01] backdrop-blur-[8px] lg:h-20 lg:backdrop-blur-[16px]"
+  class="fixed left-0 top-0 z-50 [overflow-x:clip] bg-black/[0.01] backdrop-blur-[8px] lg:h-20 lg:backdrop-blur-[16px]"
+  style="right: var(--sw, 0px);"
 >
   <!-- ========= Desktop ========= -->
   <div class="container-x hidden h-20 items-center justify-between gap-8 lg:flex">

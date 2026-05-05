@@ -1,0 +1,48 @@
+---
+/**
+ * Маленькая круглая play-кнопка (figma 896:4785). h-8×w-8 (32px),
+ * белый фон, play-иконка по центру. Используется как мобильный
+ * trigger для модалки с видео.
+ *
+ * Два режима триггера:
+ *  - `videoSrc` передан → ставит [data-video-card] + [data-video-src],
+ *    использует существующую VideoCard-модалку (одна на странице).
+ *    Подходит когда нужен конкретный URL видео (например Hero mobile,
+ *    URL такой же как у десктопной VideoCard).
+ *  - `videoSrc` не передан → ставит [data-video-trigger], использует
+ *    VideoModal.astro (с зашитым в нём URL для Order).
+ *
+ * Позиционирование (absolute bottom-X right-X) и видимость
+ * (`lg:hidden`) задаются через `class`-prop снаружи.
+ */
+interface Props {
+  /** URL Rutube embed. Если задан — модалка открывается через VideoCard. */
+  videoSrc?: string;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  videoSrc,
+  class: className = "",
+  ariaLabel = "Смотреть видео",
+} = Astro.props;
+---
+
+<button
+  type="button"
+  aria-label={ariaLabel}
+  class:list={[
+    "flex h-8 w-8 items-center justify-center rounded-full bg-white text-brand",
+    className,
+  ]}
+  {...videoSrc
+    ? { "data-video-card": "", "data-video-src": videoSrc }
+    : { "data-video-trigger": "" }}
+>
+  <svg viewBox="0 0 14 16" fill="currentColor" aria-hidden="true" class="h-3 w-auto">
+    <path
+      d="M13 7.13397C13.6667 7.51887 13.6667 8.48113 13 8.86603L2 15.2206C1.33333 15.6055 0.5 15.1244 0.5 14.3546L0.5 1.64545C0.5 0.875645 1.33333 0.394521 2 0.779421L13 7.13397Z"
+    />
+  </svg>
+</button>

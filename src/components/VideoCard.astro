@@ -1,9 +1,8 @@
 ---
 /**
- * Карточка-кнопка для открытия видео-плеера Rutube в модалке.
- * iframe-src ленивая: пустой по умолчанию, заполняется при клике (без
- * фоновых сетевых запросов до открытия). При закрытии — снимаем src,
- * чтобы плеер прекратил воспроизведение и отключился от сети.
+ * Карточка-кнопка для открытия видео-плеера Rutube. Сама модалка
+ * рендерится отдельно через VideoCardModal.astro (один singleton
+ * на странице, ловит все [data-video-card] клики).
  */
 interface Props {
   /** Embed-URL Rutube-плеера (вида https://rutube.ru/play/embed/<ID>?…) */
@@ -13,7 +12,7 @@ interface Props {
 
 const {
   videoSrc = "https://rutube.ru/play/embed/4bdb493e271ad3e31837f63c48fb7e26/?skinColor=32A3FD",
-  label = "Видео о продукте",
+  label = "Видео о продукте",
 } = Astro.props;
 ---
 
@@ -38,64 +37,3 @@ const {
     {label}
   </span>
 </button>
-
-<!-- Лайтбокс для Rutube iframe; рендерится один раз на странице -->
-<dialog
-  data-video-dialog
-  class="m-auto rounded-2xl border border-strong bg-ink-900/95 p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm w-[min(90vw,1100px)]"
->
-  <div class="relative aspect-video w-full">
-    <button
-      type="button"
-      data-video-close
-      aria-label="Закрыть"
-      class="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
-    >
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-        <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </button>
-    <iframe
-      data-video-player
-      title="Видео о продукте"
-      allow="clipboard-write; autoplay"
-      allowfullscreen
-      class="h-full w-full rounded-2xl border-0 bg-black"
-    >
-    </iframe>
-  </div>
-</dialog>
-
-<script>
-  /** Ленивая загрузка Rutube-iframe: src ставим только при открытии диалога,
-   *  снимаем при закрытии. Это не запускает фоновые запросы до клика и
-   *  останавливает воспроизведение/трекинг при закрытии. */
-  const cards = document.querySelectorAll<HTMLButtonElement>("[data-video-card]");
-  const dialog = document.querySelector<HTMLDialogElement>("[data-video-dialog]");
-  const player = dialog?.querySelector<HTMLIFrameElement>("[data-video-player]");
-  const closeBtn = dialog?.querySelector<HTMLButtonElement>("[data-video-close]");
-
-  if (dialog && player && closeBtn) {
-    cards.forEach((card) => {
-      card.addEventListener("click", () => {
-        const src = card.dataset.videoSrc;
-        if (src) player.src = src;
-        dialog.showModal();
-      });
-    });
-
-    const close = () => {
-      // Снимаем src — это останавливает Rutube-плеер и закрывает соединение.
-      player.removeAttribute("src");
-      dialog.close();
-    };
-
-    closeBtn.addEventListener("click", close);
-    dialog.addEventListener("click", (e) => {
-      if (e.target === dialog) close();
-    });
-    dialog.addEventListener("close", () => {
-      player.removeAttribute("src");
-    });
-  }
-</script>

@@ -3,8 +3,16 @@ import Button from "../Button.astro";
 import FeatureCard from "../FeatureCard.astro";
 import FeatureModal from "../FeatureModal.astro";
 import VideoCard from "../VideoCard.astro";
+import VideoCardModal from "../VideoCardModal.astro";
+import PlayButton from "../PlayButton.astro";
 import { getImage } from "astro:assets";
 import heroCityImg from "../../assets/images/hero-city.jpg";
+
+// URL Rutube-embed «Видео о продукте» — он же дефолтный в VideoCard,
+// дублируем явно чтобы мобильная PlayButton была привязана к тому же
+// видео, что десктопная VideoCard.
+const HERO_VIDEO_URL =
+  "https://rutube.ru/play/embed/4bdb493e271ad3e31837f63c48fb7e26/?skinColor=32A3FD";
 
 // poster у <video> принимает только URL-строку, поэтому через getImage
 // получаем оптимизированный WebP-URL и передаём как строку.
@@ -68,6 +76,14 @@ const features = [
     >
     </div>
 
+    <!-- Mobile-only play-button: тот же URL, что у десктопной VideoCard
+         (figma 750-3643). На десктопе скрыта — там играет VideoCard. -->
+    <PlayButton
+      videoSrc={HERO_VIDEO_URL}
+      class="absolute bottom-4 right-4 lg:hidden"
+      ariaLabel="Смотреть видео о продукте"
+    />
+
     <!-- Pin-карточки внизу — ТОЛЬКО на десктопе: видео-карточка слева + 4 фичи справа.
          На мобиле эти плашки внутри видео скрыты (`hidden lg:flex`),
          их роль играет блок под видео: figma 750:3736+750:3758+750:3806.
@@ -80,7 +96,7 @@ const features = [
       class="absolute bottom-6 left-6 right-6 hidden flex-wrap items-end justify-between gap-4 will-change-transform lg:flex"
       style="transform: translate3d(0, var(--cards-y, calc(100% + 1.5rem)), 0)"
     >
-      <VideoCard label="Видео о продукте" />
+      <VideoCard label="Видео о продукте" videoSrc={HERO_VIDEO_URL} />
 
       <ul class="flex flex-wrap items-end justify-end gap-4">
         {
@@ -139,6 +155,12 @@ const features = [
 <!-- Модалка-сториз для клика по feature-cards. Рендерится один раз
      на странице, JS внутри ловит клики на `[data-feature-card]`. -->
 <FeatureModal />
+
+<!-- Singleton-модалка для всех [data-video-card] (VideoCard в desktop-
+     hero-cards и PlayButton в mobile-hero). Раньше dialog жил внутри
+     VideoCard и оказывался в hidden-контейнере на мобиле — showModal
+     не отрабатывал. Теперь модалка отдельно. -->
+<VideoCardModal />
 
 <!--
   Лёгкий parallax на фоновую картинку при скролле — чистый CSS не сделать
