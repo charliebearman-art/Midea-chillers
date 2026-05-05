@@ -347,13 +347,13 @@ a {
    spacer = card_height + желаемый_gap - flex_gap
    Products mt = -card_height → Products полностью накрывает card 04.
 
-   Mobile:  card 32rem    + 5rem gap - 1rem (gap-4)   = 36rem   spacer
-            Products mt = -32rem
+   Mobile:  card 34rem    + 5rem gap - 1rem (gap-4)   = 38rem   spacer
+            Products mt = -34rem
    Desktop: card 22.375rem + 5rem gap - 1.5rem (gap-6) = 25.875rem
             Products mt = -22.375rem
 */
 .details-spacer {
-  height: 36rem;
+  height: 38rem;
   flex-shrink: 0;
 }
 @media (min-width: 640px) {
@@ -365,7 +365,7 @@ a {
 .products-curtain {
   position: relative;
   z-index: 30;
-  margin-top: -32rem;
+  margin-top: -34rem;
 }
 @media (min-width: 640px) {
   .products-curtain {
