@@ -318,39 +318,48 @@ a {
   }
 }
 
-/* Sticky-cascade и Products curtain — только на десктопе.
-   На мобиле (per figma 750:3643) карточки в обычном column flow,
-   sticky/curtain не используются. Брейкпоинт 640 синхронизирован
-   с tailwind.config.mjs (lg: "640px"). */
+/* Sticky-cascade на обоих viewport'ах: карточки 01-04 залипают на одной
+   верхней линии, z-index определяет порядок наложения (поздние карточки
+   накрывают предыдущие).
+   Mobile: top-5rem (header h-16 + 1rem отступ), карточки content-fit
+     (variable height) — последняя card 04 самая длинная, стак финиширует
+     чисто.
+   Desktop: top-18.9rem (под sticky h2), карточки h-22.375rem равной
+     высоты — стак pixel-perfect.
+   Брейкпоинт 640 синхронизирован с tailwind.config.mjs (lg: "640px"). */
+.detail-stack-item {
+  position: sticky;
+  top: 5rem; /* 64px header + 16px gap = 80px на мобиле */
+  z-index: calc(10 + var(--stack-index, 0));
+}
 @media (min-width: 640px) {
   html {
-    /* Десктопный header h-20 = 80px = 5rem */
     scroll-padding-top: 5rem;
   }
 
   .detail-stack-item {
-    position: sticky;
-    /* h2 sticky-top 9rem + h2 height 6.9rem (text-h1 × 1.15 × 2 строки)
-       + 3rem (48px gap до карточки, mb-12) = 18.9rem.
-       Все 4 карточки залипают на ОДНОЙ ПОЗИЦИИ — стек по верхней линии
-       без cascade-смещения, z-index определяет порядок наложения. */
+    /* h2 sticky-top 9rem + h2 height 6.9rem + 3rem (gap до карточки) = 18.9rem */
     top: 18.9rem;
-    z-index: calc(10 + var(--stack-index, 0));
   }
 }
 
-/* Спейсер + Products mt подобраны математически для desktop sticky-стека:
-     spacer = card_height + желаемый_gap - flex_gap = 22.375 + 5 - 1.5 = 25.875rem
-     Products mt = -card_height = -22.375rem
-   На мобиле спейсер скрыт (карты в normal flow, не нуждаются в нём)
-   и Products curtain отключён. */
+/* Спейсер: даёт card 04 sticky-время после её natural-position.
+   Mobile: 6rem (~96px sticky-этап для card 04 перед unstick).
+   Desktop: card_height + 5rem - 1.5rem = 25.875rem (математически
+   синхронно с Products curtain).
+
+   Products curtain mt:
+   Mobile: не применяется — на мобиле curtain делается через
+     data-mobile-slide-up (см. lib/mobile-reveal.ts), который даёт
+     translateY(60→0) при входе Products в viewport, без зависимости
+     от варьирующейся card_height.
+   Desktop: -22.375rem (= -card_height) → полное накрытие card 04. */
 .details-spacer {
-  display: none;
+  height: 6rem;
   flex-shrink: 0;
 }
 @media (min-width: 640px) {
   .details-spacer {
-    display: block;
     height: 25.875rem;
   }
 }
