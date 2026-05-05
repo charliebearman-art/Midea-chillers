@@ -58,11 +58,11 @@ const init = () => {
         }
       });
     },
-    // rootMargin: 0 (раньше было -10% bottom — на мобиле создавало
-    // 80px-задержку перед reveal sticky-секций типа Projects).
-    // threshold: 0.01 — fire как только малейшая часть элемента
-    // попала в viewport, без ожидания «10% видимости».
-    { rootMargin: "0px", threshold: 0.01 },
+    // Pre-fire reveal на 100px ДО входа элемента в viewport: к моменту
+    // видимости 800ms-анимация уже идёт, на быстром скролле пользователь
+    // не видит «пустого» элемента. threshold:0 — fire при первом пикселе
+    // intersection (с учётом rootMargin extension).
+    { rootMargin: "0px 0px 100px 0px", threshold: 0 },
   );
 
   targets.forEach((el) => io.observe(el));
