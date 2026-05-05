@@ -167,7 +167,11 @@ const inputs: InputField[] = [
               aria-label="Прикрепить файл"
             />
           </label>
-          <ul data-files-list class="mt-2 flex flex-col gap-2"></ul>
+          <!-- empty:hidden — пустой <ul> убирается из layout (display:none),
+               чтобы не добавлять gap-1 + mt-2 = 12px между дропзоной и
+               кнопкой. С файлами — `mt-2` (8px) + parent gap-1 (4px) = 12px
+               между дропзоной и списком. -->
+          <ul data-files-list class="empty:hidden mt-2 flex flex-col gap-2"></ul>
           <p data-uploader-error class="mt-1 hidden text-t12 leading-[1.6] text-[#ff5752]"></p>
         </div>
         </div>
