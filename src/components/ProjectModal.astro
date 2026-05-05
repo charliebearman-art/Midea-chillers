@@ -163,8 +163,14 @@ const projects: Project[] = [
        становится горизонтальной scroll-snap каруселью (все 6 карт видны
        свайпом, peek соседней). На десктопе — display:block, активная
        карта переключается через data-active (display:none для неактивных). -->
-  <div class="relative flex min-h-full w-full items-start justify-center px-4 py-10 lg:items-center lg:py-16">
-    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:snap-none">
+  <!-- На мобиле убираем px-4: peek соседней карточки в горизонтальной
+       карусели должен уходить к самому краю экрана. На десктопе оставляем
+       px-4 (нужно для отступа от стрелок которые висят fixed по краям). -->
+  <div class="relative flex min-h-full w-full items-start justify-center py-10 lg:items-center lg:px-4 lg:py-16">
+    <!-- На мобиле px-4 = 16px-зазор между first card↔left edge и last
+         card↔right edge экрана. На десктопе lg:block — карточка без
+         карусели, padding не нужен. -->
+    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
       {
         projects.map((p, i) => (
           <article
@@ -357,7 +363,11 @@ const projects: Project[] = [
         if (window.innerWidth < 640 && content) {
           requestAnimationFrame(() => {
             const target = cards[idx] as HTMLElement | undefined;
-            if (target) content.scrollLeft = target.offsetLeft;
+            if (!target) return;
+            // Центрируем выбранную карту в viewport (см. ту же логику в
+            // FeatureModal). Без этого карта прижималась к левому краю и
+            // peek был бы только справа.
+            content.scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
           });
         }
       });

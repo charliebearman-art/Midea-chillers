@@ -88,7 +88,11 @@ const features: Feature[] = [
          absolute -left/-right. Так стрелки всегда «у краёв активной».
          data-modal-content помечает «не-backdrop» зону: клики внутри (карта,
          стрелки) не закрывают модалку, клики снаружи — закрывают. -->
-    <div data-modal-content class="relative w-[calc(100vw-2rem)] max-w-[calc(100vw-2rem)] lg:w-[32.5rem] lg:max-w-none">
+    <!-- На мобиле wrapper = полный viewport (w-screen), чтобы peek соседней
+         карточки уходил в самый край экрана (без 1rem-зазора слева/справа,
+         как было с w-[calc(100vw-2rem)]). На десктопе остаётся 32.5rem =
+         ширина активной карточки + absolute-стрелки по бокам. -->
+    <div data-modal-content class="relative w-screen max-w-none lg:w-[32.5rem]">
       <!-- Prev-arrow: на мобиле скрыта (swipe вместо стрелок); на десктопе
            absolute -left-[4.5rem] = 72px за левый край активной карточки. -->
       <button
@@ -116,10 +120,14 @@ const features: Feature[] = [
 
       <!-- Track: 4 карточки в flex-row, gap-6 (=24px). translateX зависит
            от активного индекса. Позиционирован absolute, чтобы вычисление
-           translate шло от left:0 wrapper-а (= центр активной). -->
+           translate шло от left:0 wrapper-а (= центр активной).
+           На мобиле px-4 (=1rem=16px на 360-master) даёт ровно 16px-зазор
+           между первой картой и левым краем экрана (и last↔right). Snap-
+           center всё равно центрирует средние карточки — padding учтён в
+           offsetLeft, JS-логика open-центрирования работает прозрачно. -->
       <div
         data-modal-track
-        class="relative flex gap-2 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:absolute lg:left-0 lg:top-1/2 lg:-translate-y-1/2 lg:gap-6 lg:overflow-visible lg:snap-none lg:transition-transform lg:duration-[400ms] lg:[transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
+        class="relative flex gap-2 overflow-x-auto px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:absolute lg:left-0 lg:top-1/2 lg:-translate-y-1/2 lg:gap-6 lg:overflow-visible lg:px-0 lg:snap-none lg:transition-transform lg:duration-[400ms] lg:[transition-timing-function:cubic-bezier(0.32,0.72,0,1)]"
       >
         {
           features.map((feature, i) => (
@@ -309,7 +317,12 @@ const features: Feature[] = [
         if (window.innerWidth < 640) {
           requestAnimationFrame(() => {
             const c = cards[active] as HTMLElement | undefined;
-            if (c) track.scrollLeft = c.offsetLeft;
+            if (!c) return;
+            // Центрируем активную карточку в viewport: scrollLeft равен
+            // offsetLeft минус половина свободного места. Иначе карта легла
+            // бы слева (offsetLeft = 0 для левой части viewport) и peek был
+            // бы только справа — пользователь бы видел асимметрию.
+            track.scrollLeft = c.offsetLeft - (track.clientWidth - c.offsetWidth) / 2;
           });
         }
       });

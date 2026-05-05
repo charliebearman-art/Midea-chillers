@@ -30,7 +30,7 @@ import VideoModal from "../VideoModal.astro";
 <section
   id="order"
   data-order-section
-  class="relative z-10 -mt-[60px] rounded-t-3xl"
+  class="relative z-10 rounded-t-3xl lg:-mt-[60px]"
   style="transform: translateY(60px); background: linear-gradient(to bottom, #0f1115 0%, #0f1115 calc(100% - 240px), transparent 100%);"
 >
   <!-- Размытый эллипс-glow (Figma 894:4635). Order имеет z-10, поэтому
@@ -226,8 +226,21 @@ import VideoModal from "../VideoModal.astro";
 <!-- Модалка с видео — открывается из кнопки [data-video-trigger]. -->
 <VideoModal />
 
+<style is:global>
+  /* Mobile: отключаем scroll-driven «выезд» Order'а из-под Contact —
+     оставляем секцию в natural position. Inline `transform: translateY(60px)`
+     перебиваем !important (специфичность инлайна 1000), плюс убрали
+     -mt-[60px] из класса (теперь lg:-mt-[60px]). На десктопе CSS не
+     срабатывает, JS управляет анимацией. */
+  @media (max-width: 639px) {
+    [data-order-section] {
+      transform: none !important;
+    }
+  }
+</style>
+
 <script>
-  /** Scroll-driven translate: Order «выезжает» из-под Contact.
+  /** Scroll-driven translate: Order «выезжает» из-под Contact (только десктоп).
    *  Старт: section.transform = translateY(60px) — установлен inline
    *  на самой секции (см. атрибут `style`), чтобы первый paint уже был
    *  в правильной стартовой позиции, без вспышки.
@@ -236,12 +249,15 @@ import VideoModal from "../VideoModal.astro";
    *  viewport: 0 когда top на уровне нижнего края (только показалась),
    *  1 когда top достигает 40% высоты viewport (уверенно в кадре).
    *  Линейная интерполяция между ними даёт плавный 1-в-1 скролл-driven
-   *  motion. При prefers-reduced-motion — фиксируем translateY(0). */
+   *  motion. При prefers-reduced-motion / mobile — фиксируем translateY(0). */
   const section = document.querySelector<HTMLElement>("[data-order-section]");
   if (section) {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      section.style.transform = "translateY(0)";
+    const isMobile = window.innerWidth < 640;
+    if (reduce || isMobile) {
+      // Mobile: CSS уже занулил transform через !important; для consistency
+      // также чистим inline-style (на случай ресайза с десктопа на мобилу).
+      section.style.transform = "";
     } else {
       const MAX_TRANSLATE = 60;
       let rafId: number | null = null;
