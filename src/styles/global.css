@@ -343,16 +343,17 @@ a {
   }
 }
 
-/* Спейсер + Products mt подобраны математически:
-   На десктопе: card_height = 22.375rem, gap_after_card4 = 80px, flex-gap = 1.5rem
-     spacer = 22.375 + 5 - 1.5 = 25.875rem
-     Products mt = -card_height = -22.375rem
-     → Products полностью накрывает card 04 без видимой полоски.
-   На мобиле card_height auto (от content), используем меньшие фикс-значения
-   для куртенц-эффекта: spacer 6rem даёт card 04 sticky-время, Products
-   mt -4rem наезжает поверх неё. */
+/* Спейсер + Products mt — same math для обоих viewports:
+   spacer = card_height + желаемый_gap - flex_gap
+   Products mt = -card_height → Products полностью накрывает card 04.
+
+   Mobile:  card 22rem    + 5rem gap - 1rem (gap-4)   = 26rem   spacer
+            Products mt = -22rem
+   Desktop: card 22.375rem + 5rem gap - 1.5rem (gap-6) = 25.875rem
+            Products mt = -22.375rem
+*/
 .details-spacer {
-  height: 6rem;
+  height: 26rem;
   flex-shrink: 0;
 }
 @media (min-width: 640px) {
@@ -364,7 +365,7 @@ a {
 .products-curtain {
   position: relative;
   z-index: 30;
-  margin-top: -4rem;
+  margin-top: -22rem;
 }
 @media (min-width: 640px) {
   .products-curtain {
