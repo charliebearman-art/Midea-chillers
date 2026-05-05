@@ -15,8 +15,10 @@ const HERO_VIDEO_URL =
   "https://rutube.ru/play/embed/4bdb493e271ad3e31837f63c48fb7e26/?skinColor=32A3FD";
 
 // poster у <video> принимает только URL-строку, поэтому через getImage
-// получаем оптимизированный WebP-URL и передаём как строку.
-const heroCityWebp = await getImage({ src: heroCityImg, format: "webp" });
+// получаем оптимизированный WebP-URL и передаём как строку. width:1440 —
+// размер десктоп-мастера (оригинал 2857px = 487 KiB, лишнее для poster).
+// Mobile отресэмплит ниже, разница невидима до video-load.
+const heroCityWebp = await getImage({ src: heroCityImg, format: "webp", width: 1440 });
 
 const features = [
   {
