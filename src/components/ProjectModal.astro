@@ -159,16 +159,19 @@ const projects: Project[] = [
     </svg>
   </button>
 
-  <!-- Wrapper для центрирования + клик-по-фону. -->
+  <!-- Wrapper для центрирования + клик-по-фону. На мобиле data-modal-content
+       становится горизонтальной scroll-snap каруселью (все 6 карт видны
+       свайпом, peek соседней). На десктопе — display:block, активная
+       карта переключается через data-active (display:none для неактивных). -->
   <div class="relative flex min-h-full w-full items-start justify-center px-4 py-10 lg:items-center lg:py-16">
-    <div data-modal-content class="relative w-full max-w-[40rem]">
+    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:snap-none">
       {
         projects.map((p, i) => (
           <article
             data-project-modal-card
             data-card-index={i}
             data-active={i === 0 ? "true" : "false"}
-            class="relative flex flex-col gap-6 rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-6 pt-2 backdrop-blur-[24px]"
+            class="relative flex w-[17.5rem] shrink-0 snap-center flex-col gap-6 rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-6 pt-2 backdrop-blur-[24px] lg:w-auto lg:shrink lg:snap-none"
           >
             <div class="aspect-[543/342] w-full overflow-hidden rounded-2xl bg-[#313131]">
               <img
@@ -223,27 +226,25 @@ const projects: Project[] = [
 </dialog>
 
 <style>
-  /* Скрываем неактивные карточки. Один <dialog> на всю страницу,
-     активная карточка определяется data-active="true". */
-  [data-project-modal-card][data-active="false"] {
-    display: none;
-  }
-  /* Появление активной карточки: лёгкий слайд + fade.
-     --enter-x задаётся из JS, направление зависит от prev/next:
-     next → новая карточка въезжает справа (+16px → 0),
-     prev → слева (−16px → 0). Если @starting-style не поддержан,
-     карточка просто появляется без анимации (graceful degrade). */
-  [data-project-modal-card][data-active="true"] {
-    opacity: 1;
-    transform: translateX(0);
-    transition:
-      opacity 280ms cubic-bezier(0.32, 0.72, 0, 1),
-      transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
-  }
-  @starting-style {
+  /* Скрываем неактивные карточки + slide-анимация — только на десктопе.
+     На мобиле все карты видны в горизонтальной scroll-snap-карусели,
+     анимация переключения не нужна (нативный свайп). */
+  @media (min-width: 640px) {
+    [data-project-modal-card][data-active="false"] {
+      display: none;
+    }
     [data-project-modal-card][data-active="true"] {
-      opacity: 0;
-      transform: translateX(var(--enter-x, 16px));
+      opacity: 1;
+      transform: translateX(0);
+      transition:
+        opacity 280ms cubic-bezier(0.32, 0.72, 0, 1),
+        transform 280ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    @starting-style {
+      [data-project-modal-card][data-active="true"] {
+        opacity: 0;
+        transform: translateX(var(--enter-x, 16px));
+      }
     }
   }
 
@@ -337,7 +338,11 @@ const projects: Project[] = [
       mouseDownOnBackdrop = false;
     });
 
-    /** Открытие из карточек Projects (data-project-card={index}). */
+    /** Открытие из карточек Projects (data-project-card={index}).
+     *  На мобиле после showModal скроллим горизонтальный track к
+     *  выбранной карте через scrollLeft = offsetLeft (rAF после
+     *  showModal — иначе layout ещё не готов). */
+    const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.projectCard;
@@ -349,6 +354,12 @@ const projects: Project[] = [
         e.preventDefault();
         setActive(idx);
         dialog.showModal();
+        if (window.innerWidth < 640 && content) {
+          requestAnimationFrame(() => {
+            const target = cards[idx] as HTMLElement | undefined;
+            if (target) content.scrollLeft = target.offsetLeft;
+          });
+        }
       });
     });
   }
