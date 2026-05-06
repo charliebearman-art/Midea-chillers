@@ -24,7 +24,11 @@ interface Project {
   title: string;
   type: string;
   address: string;
+  /** Основная обложка. Если задан images — игнорируется (берётся images[0]). */
   image: string;
+  /** Опциональная галерея фото объекта. Если задана — рендерится карусель
+   *  с prev/next-стрелками и индикаторами-точками. Иначе — одиночное фото. */
+  images?: string[];
   equipment: Equipment[];
   /** Итог по мощности — необязательная строка снизу таблицы (см. Вектор-Бэст). */
   total?: { label: string; value: string };
@@ -35,7 +39,13 @@ const projects: Project[] = [
     title: "Вектор-Бэст Корпус 14, Новосибирск",
     type: "Фармацевтическое предприятие",
     address: "г. Новосибирск, Советский район, ул. Арбузова, д. 1/1",
-    image: asset("/images/project-vector-best.jpg"),
+    image: asset("/images/project-vector-best-1.webp"),
+    images: [
+      asset("/images/project-vector-best-1.webp"),
+      asset("/images/project-vector-best.jpg"),
+      asset("/images/project-vector-best-3.webp"),
+      asset("/images/project-vector-best-4.webp"),
+    ],
     equipment: [
       { model: "MGRH12A-PR3Z", qty: "1 шт." },
       { model: "MGRH17A-PR3-P", qty: "1 шт." },
@@ -185,17 +195,81 @@ const projects: Project[] = [
             data-active={i === 0 ? "true" : "false"}
             class="relative flex w-[18.75rem] shrink-0 snap-center flex-col gap-6 rounded-3xl border-2 border-strong bg-glass-deep px-2 pb-6 pt-2 backdrop-blur-[24px] lg:w-auto lg:shrink lg:snap-none"
           >
-            <div class="aspect-[543/342] w-full overflow-hidden rounded-2xl bg-[#313131]">
-              <img
-                src={p.image}
-                alt={p.title}
-                width="543"
-                height="342"
-                loading="lazy"
-                decoding="async"
-                class="h-full w-full object-cover"
-              />
-            </div>
+            {p.images && p.images.length > 1 ? (
+              <div
+                class="relative aspect-[543/342] w-full overflow-hidden rounded-2xl bg-[#313131]"
+                data-gallery
+                data-gallery-active="0"
+              >
+                <div data-gallery-track class="absolute inset-0 flex transition-transform duration-300 ease-out">
+                  {p.images.map((src) => (
+                    <img
+                      src={src}
+                      alt={p.title}
+                      width="543"
+                      height="342"
+                      loading="lazy"
+                      decoding="async"
+                      class="h-full w-full shrink-0 object-cover"
+                    />
+                  ))}
+                </div>
+
+                {/* Prev/Next arrows. На мобиле меньше (h-8), на десктопе h-10. */}
+                <button
+                  type="button"
+                  data-gallery-prev
+                  aria-label="Предыдущее фото"
+                  class="absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80 disabled:pointer-events-none disabled:opacity-30 lg:left-3 lg:h-10 lg:w-10"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" class="rotate-180" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  data-gallery-next
+                  aria-label="Следующее фото"
+                  class="absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white backdrop-blur-sm transition-opacity hover:bg-black/80 disabled:pointer-events-none disabled:opacity-30 lg:right-3 lg:h-10 lg:w-10"
+                >
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path
+                      fill-rule="evenodd"
+                      clip-rule="evenodd"
+                      d="M8.96973 2.96967C9.26262 2.67678 9.73738 2.67678 10.0303 2.96967L14.5303 7.46967C14.8232 7.76256 14.8232 8.23732 14.5303 8.53022L10.0303 13.0302C9.73738 13.3231 9.26262 13.3231 8.96973 13.0302C8.67683 12.7373 8.67683 12.2626 8.96973 11.9697L12.1895 8.74994L2 8.74994C1.58579 8.74994 1.25 8.41416 1.25 7.99994C1.25 7.58573 1.58579 7.24994 2 7.24994L12.1895 7.24994L8.96973 4.03022C8.67683 3.73732 8.67683 3.26256 8.96973 2.96967Z"
+                    />
+                  </svg>
+                </button>
+
+                {/* Точки-индикаторы внизу. Активная — bg-white, остальные bg-white/40. */}
+                <div class="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+                  {p.images.map((_, dotIdx) => (
+                    <span
+                      data-gallery-dot
+                      data-dot-index={dotIdx}
+                      class="h-1.5 w-1.5 rounded-full bg-white/40 transition-colors data-[active=true]:bg-white"
+                      data-active={dotIdx === 0 ? "true" : "false"}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div class="aspect-[543/342] w-full overflow-hidden rounded-2xl bg-[#313131]">
+                <img
+                  src={p.image}
+                  alt={p.title}
+                  width="543"
+                  height="342"
+                  loading="lazy"
+                  decoding="async"
+                  class="h-full w-full object-cover"
+                />
+              </div>
+            )}
 
             <div class="flex flex-col gap-4 px-2 text-text-primary lg:px-4">
               <h3 class="text-h4 font-medium leading-[1.4] lg:text-h2 lg:leading-[1.15]">{p.title}</h3>
@@ -396,6 +470,48 @@ const projects: Project[] = [
           });
         }
       });
+    });
+
+    /** Галерея фото внутри карточки объекта (data-gallery).
+     *  Управляется через translateX trackа + data-gallery-active атрибут,
+     *  prev/next-кнопки и точки-индикаторы синхронизированы.
+     *  В Вектор-Бэст 4 фото; в остальных карточках одиночное фото без галереи. */
+    document.querySelectorAll<HTMLElement>("[data-gallery]").forEach((gallery) => {
+      const track = gallery.querySelector<HTMLElement>("[data-gallery-track]");
+      const prev = gallery.querySelector<HTMLButtonElement>("[data-gallery-prev]");
+      const next = gallery.querySelector<HTMLButtonElement>("[data-gallery-next]");
+      const dots = Array.from(gallery.querySelectorAll<HTMLElement>("[data-gallery-dot]"));
+      const total = track?.children.length ?? 0;
+      if (!track || !prev || !next || total <= 1) return;
+
+      const setIdx = (idx: number) => {
+        const clamped = Math.max(0, Math.min(total - 1, idx));
+        gallery.dataset.galleryActive = String(clamped);
+        track.style.transform = `translateX(-${clamped * 100}%)`;
+        dots.forEach((dot, i) => {
+          dot.dataset.active = i === clamped ? "true" : "false";
+        });
+        prev.disabled = clamped === 0;
+        next.disabled = clamped === total - 1;
+      };
+
+      prev.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setIdx(Number(gallery.dataset.galleryActive ?? 0) - 1);
+      });
+      next.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setIdx(Number(gallery.dataset.galleryActive ?? 0) + 1);
+      });
+      dots.forEach((dot) => {
+        dot.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const idx = Number(dot.dataset.dotIndex ?? 0);
+          setIdx(idx);
+        });
+      });
+
+      setIdx(0);
     });
   }
 </script>
