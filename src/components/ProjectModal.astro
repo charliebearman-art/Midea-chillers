@@ -512,6 +512,46 @@ const projects: Project[] = [
         });
       });
 
+      /** Touch-свайп: горизонтальный жест переключает на prev/next.
+       *  threshold 50px — минимальное смещение чтобы засчитать свайп.
+       *  Игнорируем вертикальные жесты (deltaY > deltaX), чтобы не
+       *  ломать скролл страницы внутри модалки. */
+      const SWIPE_THRESHOLD = 50;
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let touchActive = false;
+
+      gallery.addEventListener(
+        "touchstart",
+        (e) => {
+          const t = e.touches[0];
+          if (!t) return;
+          touchStartX = t.clientX;
+          touchStartY = t.clientY;
+          touchActive = true;
+        },
+        { passive: true },
+      );
+
+      gallery.addEventListener(
+        "touchend",
+        (e) => {
+          if (!touchActive) return;
+          touchActive = false;
+          const t = e.changedTouches[0];
+          if (!t) return;
+          const dx = t.clientX - touchStartX;
+          const dy = t.clientY - touchStartY;
+          // Игнорируем вертикальные жесты (скролл) и слишком короткие.
+          if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+          if (Math.abs(dy) > Math.abs(dx)) return;
+          const current = Number(gallery.dataset.galleryActive ?? 0);
+          // Свайп влево (dx<0) → next, свайп вправо (dx>0) → prev.
+          setIdx(dx < 0 ? current + 1 : current - 1);
+        },
+        { passive: true },
+      );
+
       setIdx(0);
     });
   }
