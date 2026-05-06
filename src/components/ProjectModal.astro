@@ -456,16 +456,17 @@ const projects: Project[] = [
         if (content) content.scrollLeft = 0;
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
-          // Двойной rAF + scrollIntoView: после showModal первый frame —
-          // браузер запускает transition (@starting-style), второй — layout
-          // settled. scrollIntoView с inline:'center' нативно центрирует
-          // target в scroll-parent с учётом snap-mandatory (надёжнее
-          // ручного content.scrollLeft).
+          // Двойной rAF + ручная установка scrollLeft (без scrollIntoView).
+          // scrollIntoView с block:'nearest' нативно подскролливает dialog
+          // вертикально чтобы target был у верха viewport — но это съедает
+          // top padding модалки. Делаем горизонтальный scroll вручную,
+          // вертикальный сбрасываем в 0 (видно top padding).
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const target = cards[idx] as HTMLElement | undefined;
               if (!target) return;
-              target.scrollIntoView({ inline: "center", block: "nearest", behavior: "instant" });
+              content.scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              dialog.scrollTop = 0;
             });
           });
         }
