@@ -206,17 +206,16 @@ const features: Feature[] = [
   /* Open-анимация native dialog: scale + fade-in 250ms (Эмиль-style).
      @starting-style работает в Chrome 117+ — fallback к мгновенному
      открытию в старых браузерах. */
+  /* ВНИМАНИЕ: без transform: scale — transform на dialog создаёт
+     containing block для fixed-потомков (close-кнопка), они уезжают
+     за пределы viewport при скролле длинного контента. */
   .feature-modal[open] {
     opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity 250ms cubic-bezier(0.32, 0.72, 0, 1),
-      transform 250ms cubic-bezier(0.32, 0.72, 0, 1);
+    transition: opacity 250ms cubic-bezier(0.32, 0.72, 0, 1);
   }
   @starting-style {
     .feature-modal[open] {
       opacity: 0;
-      transform: scale(0.97);
     }
   }
   .feature-modal[open]::backdrop {

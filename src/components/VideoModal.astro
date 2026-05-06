@@ -56,17 +56,15 @@ const VIDEO_URL = "https://rutube.ru/play/embed/f54b027bc9a7043dd7dbcde8145aaeab
 </dialog>
 
 <style>
+  /* Без transform: scale — иначе fixed-потомки внутри dialog (close-
+     кнопка) теряют viewport-привязку и скроллятся с контентом. */
   .video-modal[open] {
     opacity: 1;
-    transform: scale(1);
-    transition:
-      opacity 250ms cubic-bezier(0.32, 0.72, 0, 1),
-      transform 250ms cubic-bezier(0.32, 0.72, 0, 1);
+    transition: opacity 250ms cubic-bezier(0.32, 0.72, 0, 1);
   }
   @starting-style {
     .video-modal[open] {
       opacity: 0;
-      transform: scale(0.97);
     }
   }
   .video-modal[open]::backdrop {
