@@ -183,11 +183,13 @@ const projects: Project[] = [
        карусели должен уходить к самому краю экрана. На десктопе оставляем
        px-4 (нужно для отступа от стрелок которые висят fixed по краям). -->
   <div class="relative flex min-h-full w-full items-start justify-center pt-20 pb-10 lg:items-center lg:px-4 lg:py-16">
-    <!-- Mobile: scroll-snap-карусель с overflow-x. Desktop: block, только
-         active card visible через CSS display:none.
-         [scroll-behavior:auto] переопределяет унаследованный с html
-         scroll-behavior:smooth — иначе программный scrollLeft анимируется. -->
-    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto [scroll-behavior:auto] px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
+    <!-- data-modal-content — простой wrapper (нужен для backdrop-click
+         detection). Внутри data-modal-track — scroller с overflow-x на
+         мобиле, см. структуру FeatureModal. Разделение исправляет баг
+         когда data-modal-content одновременно был flex+overflow-x и
+         clientWidth возвращал 0 на iOS Safari в момент showModal. -->
+    <div data-modal-content class="relative w-full max-w-[40rem] lg:px-0">
+      <div data-modal-track class="flex gap-2 overflow-x-auto [scroll-behavior:auto] px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
       {
         projects.map((p, i) => (
           <article
@@ -308,6 +310,7 @@ const projects: Project[] = [
           </article>
         ))
       }
+      </div>
     </div>
   </div>
 </dialog>
@@ -430,6 +433,7 @@ const projects: Project[] = [
      *  быть 0, calc отдаёт ~0, snap-mandatory snapит к card[0]
      *  (Вектор-Бэст), и пользователь видит не ту карточку которую тапнул. */
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
+    const track = dialog.querySelector<HTMLElement>("[data-modal-track]");
 
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
@@ -442,21 +446,13 @@ const projects: Project[] = [
         console.log("[ProjectModal] click idx=", idx, "raw=", raw);
         setActive(idx);
         dialog.showModal();
-        if (window.innerWidth < 640 && content) {
+        if (window.innerWidth < 640 && track) {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const target = cards[idx] as HTMLElement | undefined;
-              if (!target) {
-                console.log("[ProjectModal] no target at idx=", idx);
-                return;
-              }
-              const cw = content.clientWidth;
-              const ow = target.offsetWidth;
-              const ol = target.offsetLeft;
-              const scrollLeft = ol - (cw - ow) / 2;
-              console.log("[ProjectModal] scroll calc:", { idx, cw, ow, ol, scrollLeft, scrollWidthBefore: content.scrollWidth, scrollLeftBefore: content.scrollLeft });
-              content.scrollTo({ left: scrollLeft, behavior: "instant" });
-              console.log("[ProjectModal] scrollLeft after:", content.scrollLeft);
+              if (!target) return;
+              const scrollLeft = target.offsetLeft - (track.clientWidth - target.offsetWidth) / 2;
+              track.scrollTo({ left: scrollLeft, behavior: "instant" });
             });
           });
         }
