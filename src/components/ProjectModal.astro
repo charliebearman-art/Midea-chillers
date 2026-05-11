@@ -183,9 +183,11 @@ const projects: Project[] = [
        карусели должен уходить к самому краю экрана. На десктопе оставляем
        px-4 (нужно для отступа от стрелок которые висят fixed по краям). -->
   <div class="relative flex min-h-full w-full items-start justify-center pt-20 pb-10 lg:items-center lg:px-4 lg:py-16">
-    <!-- Только активная карточка показывается (display:none на non-active).
-         На мобиле centered horizontally через justify-center. -->
-    <div data-modal-content class="relative flex w-full max-w-[40rem] justify-center px-4 lg:block lg:px-0">
+    <!-- Mobile: scroll-snap-карусель с overflow-x. Desktop: block, только
+         active card visible через CSS display:none.
+         [scroll-behavior:auto] переопределяет унаследованный с html
+         scroll-behavior:smooth — иначе программный scrollLeft анимируется. -->
+    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto [scroll-behavior:auto] px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
       {
         projects.map((p, i) => (
           <article
@@ -311,15 +313,13 @@ const projects: Project[] = [
 </dialog>
 
 <style>
-  /* Скрываем неактивные карточки на ВСЕХ viewport'ах. Раньше мобиле
-     была scroll-snap-карусель с тяжёлой race-condition-проблемой:
-     при открытии модалки content.scrollLeft не успевал сдвинуться к
-     tapped-карте, видна была card[0] (Вектор-Бэст). Теперь активная —
-     единственная видимая, scroll вообще не нужен. */
-  [data-project-modal-card][data-active="false"] {
-    display: none;
-  }
+  /* Скрываем неактивные карточки + slide-анимация — только на десктопе.
+     На мобиле все карты видны в горизонтальной scroll-snap-карусели,
+     свайп между объектами работает. */
   @media (min-width: 640px) {
+    [data-project-modal-card][data-active="false"] {
+      display: none;
+    }
     [data-project-modal-card][data-active="true"] {
       opacity: 1;
       transform: translateX(0);
@@ -435,9 +435,14 @@ const projects: Project[] = [
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
 
     /** Открытие модалки из карточек Projects (data-project-card={index}).
-     *  С новой моделью (только active card visible через display:none на
-     *  non-active) scroll-логика не нужна — setActive переключает video
-     *  показанную карточку. */
+     *
+     *  Трюк visibility:hidden: на мобиле scroll-snap карусель должна
+     *  открыться на нужной карте. После showModal() scrollLeft = 0 пока
+     *  JS не выставит правильное значение → пользователь видит card[0]
+     *  во время race condition.
+     *  Решение: content.style.visibility = 'hidden' до scrollLeft set,
+     *  потом снимаем. Layout вычисляется (hidden, не display:none), но
+     *  не рендерится — пользователь не видит проскролл от 0 к нужной. */
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.projectCard;
@@ -448,8 +453,31 @@ const projects: Project[] = [
         if (card.closest("[data-projects-track].is-dragging")) return;
         e.preventDefault();
         setActive(idx);
+        if (window.innerWidth < 640 && content) {
+          // Прячем content до момента когда scrollLeft выставлен.
+          content.style.visibility = "hidden";
+        }
         dialog.showModal();
+        if (window.innerWidth < 640 && content) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              const target = cards[idx] as HTMLElement | undefined;
+              if (content && target && content.clientWidth > 0) {
+                content.scrollLeft =
+                  target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              }
+              if (content) content.style.visibility = "";
+              dialog.scrollTop = 0;
+            });
+          });
+        }
       });
+    });
+
+    // Сброс carousel-scroll при закрытии — иначе scrollLeft персистится
+    // через open/close и видна неправильная карта на долю секунды.
+    dialog.addEventListener("close", () => {
+      if (content) content.scrollLeft = 0;
     });
 
     /** Галерея фото внутри карточки объекта (data-gallery).
