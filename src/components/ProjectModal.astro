@@ -435,10 +435,11 @@ const projects: Project[] = [
 
     // Сброс carousel-scroll при закрытии модалки (любым способом — кнопка,
     // backdrop, Esc) — иначе scrollLeft персистится через open/close и
-    // следующая открытая модалка показывает последнюю свайпнутую карточку
-    // вместо запрошенной.
+    // следующая открытая модалка показывает последнюю свайпнутую карточку.
+    // behavior: 'instant' обходит унаследованный с html `scroll-behavior:
+    // smooth` — иначе сброс анимируется и пользователь видит проскролл.
     dialog.addEventListener("close", () => {
-      if (content) content.scrollLeft = 0;
+      if (content) content.scrollTo({ left: 0, behavior: "instant" });
     });
 
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
@@ -451,21 +452,22 @@ const projects: Project[] = [
         if (card.closest("[data-projects-track].is-dragging")) return;
         e.preventDefault();
         setActive(idx);
-        // Sync-сброс scroll перед showModal — страховка на случай если
-        // close-handler не сработал (теоретически).
-        if (content) content.scrollLeft = 0;
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
-          // Двойной rAF + ручная установка scrollLeft (без scrollIntoView).
-          // scrollIntoView с block:'nearest' нативно подскролливает dialog
-          // вертикально чтобы target был у верха viewport — но это съедает
-          // top padding модалки. Делаем горизонтальный scroll вручную,
-          // вертикальный сбрасываем в 0 (видно top padding).
+          // ВАЖНО про behavior:'instant': в global.css на html стоит
+          // scroll-behavior: smooth, наследуется. Без behavior:'instant'
+          // программный scroll анимируется — на мобиле виден проскролл
+          // от card[0] к нужной карте, выглядит как «открылась не та».
+          //
+          // Двойной rAF: после showModal layout dialog ещё не settled —
+          // clientWidth и offsetLeft могут быть 0. После 2 frames всё
+          // валидно.
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const target = cards[idx] as HTMLElement | undefined;
               if (!target) return;
-              content.scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              const scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              content.scrollTo({ left: scrollLeft, behavior: "instant" });
               dialog.scrollTop = 0;
             });
           });

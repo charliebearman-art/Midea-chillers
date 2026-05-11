@@ -315,14 +315,16 @@ const features: Feature[] = [
         update();
         dialog.showModal();
         if (window.innerWidth < 640) {
-          // Double-rAF: после showModal layout dialog ещё не settled, можно
-          // получить clientWidth=0/offsetLeft=0, scrollLeft становится ~0,
-          // snap-mandatory snapit к card[0] вместо запрошенной.
+          // Double-rAF + behavior:'instant': после showModal layout не
+          // settled (clientWidth=0). behavior:'instant' обходит унаследованный
+          // с html scroll-behavior:smooth — иначе видна анимация scroll'а
+          // от 0 к нужной карте.
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const c = cards[active] as HTMLElement | undefined;
               if (!c) return;
-              track.scrollLeft = c.offsetLeft - (track.clientWidth - c.offsetWidth) / 2;
+              const scrollLeft = c.offsetLeft - (track.clientWidth - c.offsetWidth) / 2;
+              track.scrollTo({ left: scrollLeft, behavior: "instant" });
             });
           });
         }
