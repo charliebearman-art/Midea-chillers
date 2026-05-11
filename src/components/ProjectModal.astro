@@ -395,9 +395,6 @@ const projects: Project[] = [
       });
       prevBtn.disabled = active === 0;
       nextBtn.disabled = active === cards.length - 1;
-      // Сброс scroll к началу контента — иначе после длинной модалки
-      // следующая открытая будет проскроллена.
-      dialog.scrollTo?.({ top: 0, behavior: "instant" });
     };
 
     prevBtn.addEventListener("click", () => setActive(active - 1));
@@ -434,50 +431,29 @@ const projects: Project[] = [
      *  (Вектор-Бэст), и пользователь видит не ту карточку которую тапнул. */
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
 
-    /** Открытие модалки из карточек Projects (data-project-card={index}).
-     *
-     *  Трюк visibility:hidden: на мобиле scroll-snap карусель должна
-     *  открыться на нужной карте. После showModal() scrollLeft = 0 пока
-     *  JS не выставит правильное значение → пользователь видит card[0]
-     *  во время race condition.
-     *  Решение: content.style.visibility = 'hidden' до scrollLeft set,
-     *  потом снимаем. Layout вычисляется (hidden, не display:none), но
-     *  не рендерится — пользователь не видит проскролл от 0 к нужной. */
+    /** Открытие модалки из карточек Projects. Логика 1-в-1 с FeatureModal —
+     *  он работает на мобиле. Двойной rAF + scrollTo({behavior:'instant'}). */
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.projectCard;
         if (raw === undefined) return;
         const idx = Number(raw);
         if (Number.isNaN(idx)) return;
-        // Не открываем модалку если идёт drag-pointer трека (см. Projects.astro).
         if (card.closest("[data-projects-track].is-dragging")) return;
         e.preventDefault();
         setActive(idx);
-        if (window.innerWidth < 640 && content) {
-          // Прячем content до момента когда scrollLeft выставлен.
-          content.style.visibility = "hidden";
-        }
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const target = cards[idx] as HTMLElement | undefined;
-              if (content && target && content.clientWidth > 0) {
-                content.scrollLeft =
-                  target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
-              }
-              if (content) content.style.visibility = "";
-              dialog.scrollTop = 0;
+              if (!target) return;
+              const scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              content.scrollTo({ left: scrollLeft, behavior: "instant" });
             });
           });
         }
       });
-    });
-
-    // Сброс carousel-scroll при закрытии — иначе scrollLeft персистится
-    // через open/close и видна неправильная карта на долю секунды.
-    dialog.addEventListener("close", () => {
-      if (content) content.scrollLeft = 0;
     });
 
     /** Галерея фото внутри карточки объекта (data-gallery).
