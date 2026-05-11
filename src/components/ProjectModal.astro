@@ -183,16 +183,9 @@ const projects: Project[] = [
        карусели должен уходить к самому краю экрана. На десктопе оставляем
        px-4 (нужно для отступа от стрелок которые висят fixed по краям). -->
   <div class="relative flex min-h-full w-full items-start justify-center pt-20 pb-10 lg:items-center lg:px-4 lg:py-16">
-    <!-- На мобиле px-4 = 16px-зазор между first card↔left edge и last
-         card↔right edge экрана. На десктопе lg:block — карточка без
-         карусели, padding не нужен.
-         [scroll-behavior:auto] — переопределяем унаследованный с html
-         scroll-behavior:smooth. Иначе при программном scrollLeft в момент
-         открытия модалки видна smooth-анимация перехода от предыдущей
-         карты к запрошенной — пользователь воспринимает как «открылась
-         не та». behavior:'instant' в scrollTo() поддержан не всеми
-         браузерами (iOS Safari < 17 fallback'ит на 'auto'). -->
-    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto [scroll-behavior:auto] px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
+    <!-- Только активная карточка показывается (display:none на non-active).
+         На мобиле centered horizontally через justify-center. -->
+    <div data-modal-content class="relative flex w-full max-w-[40rem] justify-center px-4 lg:block lg:px-0">
       {
         projects.map((p, i) => (
           <article
@@ -318,13 +311,15 @@ const projects: Project[] = [
 </dialog>
 
 <style>
-  /* Скрываем неактивные карточки + slide-анимация — только на десктопе.
-     На мобиле все карты видны в горизонтальной scroll-snap-карусели,
-     анимация переключения не нужна (нативный свайп). */
+  /* Скрываем неактивные карточки на ВСЕХ viewport'ах. Раньше мобиле
+     была scroll-snap-карусель с тяжёлой race-condition-проблемой:
+     при открытии модалки content.scrollLeft не успевал сдвинуться к
+     tapped-карте, видна была card[0] (Вектор-Бэст). Теперь активная —
+     единственная видимая, scroll вообще не нужен. */
+  [data-project-modal-card][data-active="false"] {
+    display: none;
+  }
   @media (min-width: 640px) {
-    [data-project-modal-card][data-active="false"] {
-      display: none;
-    }
     [data-project-modal-card][data-active="true"] {
       opacity: 1;
       transform: translateX(0);
@@ -439,15 +434,10 @@ const projects: Project[] = [
      *  (Вектор-Бэст), и пользователь видит не ту карточку которую тапнул. */
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
 
-    // Сброс carousel-scroll при закрытии модалки (любым способом — кнопка,
-    // backdrop, Esc) — иначе scrollLeft персистится через open/close и
-    // следующая открытая модалка показывает последнюю свайпнутую карточку.
-    // behavior: 'instant' обходит унаследованный с html `scroll-behavior:
-    // smooth` — иначе сброс анимируется и пользователь видит проскролл.
-    dialog.addEventListener("close", () => {
-      if (content) content.scrollTo({ left: 0, behavior: "instant" });
-    });
-
+    /** Открытие модалки из карточек Projects (data-project-card={index}).
+     *  С новой моделью (только active card visible через display:none на
+     *  non-active) scroll-логика не нужна — setActive переключает video
+     *  показанную карточку. */
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.projectCard;
@@ -459,37 +449,6 @@ const projects: Project[] = [
         e.preventDefault();
         setActive(idx);
         dialog.showModal();
-        if (window.innerWidth < 640 && content) {
-          // Скролл к нужной карте. Делаем несколько попыток на случай
-          // если layout не settled: void content.offsetWidth форсит
-          // sync-layout, затем устанавливаем scrollLeft. Если clientWidth
-          // ещё 0 (на iOS Safari такое бывает) — повторяем через
-          // setTimeout. CSS [scroll-behavior:auto] на content гарантирует
-          // что scroll instant (smooth с html не наследуется).
-          const scrollToCard = () => {
-            const target = cards[idx] as HTMLElement | undefined;
-            if (!target || !content) return false;
-            // Force sync layout
-            void content.offsetWidth;
-            const cw = content.clientWidth;
-            const ow = target.offsetWidth;
-            const ol = target.offsetLeft;
-            if (cw === 0 || ow === 0) return false;
-            content.scrollLeft = ol - (cw - ow) / 2;
-            dialog.scrollTop = 0;
-            return true;
-          };
-          // 1-я попытка сразу (часто работает, dialog уже отрендерен)
-          if (!scrollToCard()) {
-            // 2-я попытка через rAF
-            requestAnimationFrame(() => {
-              if (!scrollToCard()) {
-                // 3-я попытка через setTimeout (для медленных вебвью)
-                setTimeout(scrollToCard, 50);
-              }
-            });
-          }
-        }
       });
     });
 
