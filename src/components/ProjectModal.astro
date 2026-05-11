@@ -431,8 +431,6 @@ const projects: Project[] = [
      *  (Вектор-Бэст), и пользователь видит не ту карточку которую тапнул. */
     const content = dialog.querySelector<HTMLElement>("[data-modal-content]");
 
-    /** Открытие модалки из карточек Projects. Логика 1-в-1 с FeatureModal —
-     *  он работает на мобиле. Двойной rAF + scrollTo({behavior:'instant'}). */
     document.querySelectorAll<HTMLElement>("[data-project-card]").forEach((card) => {
       card.addEventListener("click", (e) => {
         const raw = card.dataset.projectCard;
@@ -441,15 +439,24 @@ const projects: Project[] = [
         if (Number.isNaN(idx)) return;
         if (card.closest("[data-projects-track].is-dragging")) return;
         e.preventDefault();
+        console.log("[ProjectModal] click idx=", idx, "raw=", raw);
         setActive(idx);
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               const target = cards[idx] as HTMLElement | undefined;
-              if (!target) return;
-              const scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
+              if (!target) {
+                console.log("[ProjectModal] no target at idx=", idx);
+                return;
+              }
+              const cw = content.clientWidth;
+              const ow = target.offsetWidth;
+              const ol = target.offsetLeft;
+              const scrollLeft = ol - (cw - ow) / 2;
+              console.log("[ProjectModal] scroll calc:", { idx, cw, ow, ol, scrollLeft, scrollWidthBefore: content.scrollWidth, scrollLeftBefore: content.scrollLeft });
               content.scrollTo({ left: scrollLeft, behavior: "instant" });
+              console.log("[ProjectModal] scrollLeft after:", content.scrollLeft);
             });
           });
         }
