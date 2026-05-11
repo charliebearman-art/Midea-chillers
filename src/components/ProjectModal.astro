@@ -460,23 +460,35 @@ const projects: Project[] = [
         setActive(idx);
         dialog.showModal();
         if (window.innerWidth < 640 && content) {
-          // ВАЖНО про behavior:'instant': в global.css на html стоит
-          // scroll-behavior: smooth, наследуется. Без behavior:'instant'
-          // программный scroll анимируется — на мобиле виден проскролл
-          // от card[0] к нужной карте, выглядит как «открылась не та».
-          //
-          // Двойной rAF: после showModal layout dialog ещё не settled —
-          // clientWidth и offsetLeft могут быть 0. После 2 frames всё
-          // валидно.
-          requestAnimationFrame(() => {
+          // Скролл к нужной карте. Делаем несколько попыток на случай
+          // если layout не settled: void content.offsetWidth форсит
+          // sync-layout, затем устанавливаем scrollLeft. Если clientWidth
+          // ещё 0 (на iOS Safari такое бывает) — повторяем через
+          // setTimeout. CSS [scroll-behavior:auto] на content гарантирует
+          // что scroll instant (smooth с html не наследуется).
+          const scrollToCard = () => {
+            const target = cards[idx] as HTMLElement | undefined;
+            if (!target || !content) return false;
+            // Force sync layout
+            void content.offsetWidth;
+            const cw = content.clientWidth;
+            const ow = target.offsetWidth;
+            const ol = target.offsetLeft;
+            if (cw === 0 || ow === 0) return false;
+            content.scrollLeft = ol - (cw - ow) / 2;
+            dialog.scrollTop = 0;
+            return true;
+          };
+          // 1-я попытка сразу (часто работает, dialog уже отрендерен)
+          if (!scrollToCard()) {
+            // 2-я попытка через rAF
             requestAnimationFrame(() => {
-              const target = cards[idx] as HTMLElement | undefined;
-              if (!target) return;
-              const scrollLeft = target.offsetLeft - (content.clientWidth - target.offsetWidth) / 2;
-              content.scrollTo({ left: scrollLeft, behavior: "instant" });
-              dialog.scrollTop = 0;
+              if (!scrollToCard()) {
+                // 3-я попытка через setTimeout (для медленных вебвью)
+                setTimeout(scrollToCard, 50);
+              }
             });
-          });
+          }
         }
       });
     });
