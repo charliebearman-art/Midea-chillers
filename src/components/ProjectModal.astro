@@ -185,8 +185,14 @@ const projects: Project[] = [
   <div class="relative flex min-h-full w-full items-start justify-center pt-20 pb-10 lg:items-center lg:px-4 lg:py-16">
     <!-- На мобиле px-4 = 16px-зазор между first card↔left edge и last
          card↔right edge экрана. На десктопе lg:block — карточка без
-         карусели, padding не нужен. -->
-    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
+         карусели, padding не нужен.
+         [scroll-behavior:auto] — переопределяем унаследованный с html
+         scroll-behavior:smooth. Иначе при программном scrollLeft в момент
+         открытия модалки видна smooth-анимация перехода от предыдущей
+         карты к запрошенной — пользователь воспринимает как «открылась
+         не та». behavior:'instant' в scrollTo() поддержан не всеми
+         браузерами (iOS Safari < 17 fallback'ит на 'auto'). -->
+    <div data-modal-content class="relative flex w-full max-w-[40rem] gap-2 overflow-x-auto [scroll-behavior:auto] px-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden lg:block lg:gap-0 lg:overflow-visible lg:px-0 lg:snap-none">
       {
         projects.map((p, i) => (
           <article
